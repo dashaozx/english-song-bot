@@ -1,0 +1,4 @@
+aiogram
+opencv-python
+moviepy
+aiohttp-socks
