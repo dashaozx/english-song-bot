@@ -258,20 +258,28 @@ async def reset_score_callback(cb: CallbackQuery):
 async def main():
     init_db()
     
-    # Мы убираем ClientTimeout, aiogram сам разберется с временем
+    # Создаем сессию и бота
     session = AiohttpSession()
     bot = Bot(token=API_TOKEN, session=session)
     
-    dp = Dispatcher()
-
-    # Регистрация команд (оставь как есть)
+    # ВАЖНО: используем тот dp, который создали в начале файла, 
+    # а не создаем новый!
+    
+    # Регистрируем все обработчики сообщений
     dp.message.register(cmd_start, CommandStart())
     dp.message.register(next_fragment, F.text == "Next")
     dp.message.register(continue_song, F.text == "Continue this song")
-
+    dp.message.register(show_songs_menu, F.text.casefold() == "play")
+    dp.message.register(lambda m: m.answer(f"Your score: {get_user_score(m.from_user.id)} ⭐"), F.text == "My score")
+    
+    # Этот обработчик должен быть ПОСЛЕДНИМ, так как он ловит любой текст
+    dp.message.register(check_answer, F.text)
+    
     print("Бот запущен и готов к работе...")
     
     try:
+        # Очищаем очередь старых сообщений и запускаем
+        await bot.delete_webhook(drop_pending_updates=True)
         await dp.start_polling(bot)
     finally:
         await bot.session.close()
