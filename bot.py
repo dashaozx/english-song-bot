@@ -75,18 +75,32 @@ SONGS = [
             {"file": "fl_12.mp4", "text": "I can take myself dancing\nAnd I can hold my ___ hand", "answer": "own", "translation_ru": "Я могу сама держать свою руку."},
             {"file": "fl_13.mp4", "text": "Yeah, I can ___ me better\nThan you can", "answer": "love", "translation_ru": "Да, я могу любить себя лучше."}
         ],
-    },
     {
-        "id": "ed_shape_of_you",
-        "title": "Shape of You - Ed Sheeran",
-        "file": "shape_of_you.mp4",
-        "fragments": [
-            {"start": 13.0, "end": 20.0, "text": "The club isn't the best place to find a lover, so the ___ is where I go", "answer": "bar", "translation_ru": "Клуб — не лучшее место, поэтому бар — это то место, куда я иду."},
-            {"start": 20.0, "end": 25.0, "text": "Me and my friends at the table doing ___", "answer": "shots", "translation_ru": "Я и мои друзья за столом пьем шоты."},
-            {"start": 56.0, "end": 62.0, "text": "I'm in love with the ___ of you", "answer": "shape", "translation_ru": "Я влюблен в твои очертания."},
-            {"start": 76.0, "end": 81.0, "text": "Oh I, oh I, oh I, oh I \nI'm in ___ with your body", "answer": "love", "translation_ru": "Я влюблен в твое тело."},
-        ],
-    },
+    "id": "ed_sheeran_shape",
+    "title": "Shape of You - Ed Sheeran",
+    "fragments": [
+        {"file": "sh_0.mp4", "text": "The club isn't the best place to find a ___", "answer": "lover", "translation_ru": "Клуб — не лучшее место для поиска любви"},
+        {"file": "sh_1.mp4", "text": "So the bar is where I ___", "answer": "go", "translation_ru": "Поэтому я иду в бар"},
+        {"file": "sh_2.mp4", "text": "Me and my friends at the table doing ___", "answer": "shots", "translation_ru": "Я и мои друзья за столом пьем шоты"},
+        {"file": "sh_3.mp4", "text": "Drinking fast and then we talk ___", "answer": "slow", "translation_ru": "Пьем быстро, говорим медленно"},
+        {"file": "sh_4.mp4", "text": "And you come over and start up a ___ with just me", "answer": "conversation", "translation_ru": "Ты подходишь и заводишь разговор только со мной"},
+        {"file": "sh_5.mp4", "text": "And trust me I'll give it a ___", "answer": "chance", "translation_ru": "И поверь мне, я дам нам шанс"},
+        {"file": "sh_6.mp4", "text": "Now my hands on your waist, please stop, put the ___ on the jukebox", "answer": "man", "translation_ru": "Мои руки на твоей талии, включи музыку в автомате"},
+        {"file": "sh_7.mp4", "text": "And then we start to ___", "answer": "dance", "translation_ru": "И мы начинаем танцевать"},
+        {"file": "sh_8.mp4", "text": "And now I'm singing like...", "answer": "girl", "translation_ru": "И я пою..."},
+        {"file": "sh_9.mp4", "text": "You know I want your ___", "answer": "love", "translation_ru": "Ты знаешь, я хочу твоей любви"},
+        {"file": "sh_10.mp4", "text": "Your love was handmade for somebody like ___", "answer": "me", "translation_ru": "Твоя любовь создана для такого, как я"},
+        {"file": "sh_11.mp4", "text": "Come on now, follow my ___", "answer": "lead", "translation_ru": "Давай же, следуй за мной"},
+        # Здесь начинаются фрагменты с 13 по 19 (припев и продолжение)
+        {"file": "sh_12.mp4", "text": "I'm in love with the ___ of you", "answer": "shape", "translation_ru": "Я влюблен в твои формы"},
+        {"file": "sh_13.mp4", "text": "We push and pull like a ___ do", "answer": "magnet", "translation_ru": "Мы притягиваемся и отталкиваемся как магниты"},
+        {"file": "sh_14.mp4", "text": "Although my heart is falling ___", "answer": "too", "translation_ru": "Хотя моё сердце тоже влюбляется"},
+        {"file": "sh_15.mp4", "text": "I'm in love with your ___", "answer": "body", "translation_ru": "Я влюблен в твое тело"},
+        {"file": "sh_16.mp4", "text": "And last night you were in my ___", "answer": "room", "translation_ru": "Вчера вечером ты была в моей комнате"},
+        {"file": "sh_17.mp4", "text": "Now my bedsheets smell like ___", "answer": "you", "translation_ru": "Теперь мои простыни пахнут тобой"},
+        {"file": "sh_18.mp4", "text": "Every day discovering something ___", "answer": "brand new", "translation_ru": "Каждый день открываю что-то совершенно новое"}
+    ]
+},
 ]
 
 # --- KEYBOARDS ---
