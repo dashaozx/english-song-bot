@@ -80,18 +80,17 @@ SONGS = [
     "id": "ed_sheeran_shape",
     "title": "Shape of You - Ed Sheeran",
     "fragments": [
-            # КУПЛЕТ 1
             {
                 "file": "sh_0.mp4", 
                 "text": "The club isn't the best place to find a lover\nSo the bar is where I ___", 
                 "answer": "head", 
-                "translation_ru": "Клуб — не лучшее место для поиска любви, поэтому я направляюсь в бар (используем head вместо go)"
+                "translation_ru": "Клуб — не лучшее место, чтобы найти любовь, поэтому я направляюсь в бар"
             },
             {
                 "file": "sh_2.mp4", 
                 "text": "Me and my friends at the table doing shots\nDrinking fast and then we ___ slow", 
                 "answer": "talk", 
-                "translation_ru": "Я и мои друзья за столом пьем шоты. Пьем быстро, болтаем не спеша"
+                "translation_ru": "Я и мои друзья за столом пьем шоты. Пьем быстро, а потом болтаем не спеша"
             },
             {
                 "file": "sh_4.mp4", 
@@ -103,29 +102,25 @@ SONGS = [
                 "file": "sh_6.mp4", 
                 "text": "Now my hands on your waist, please stop\nPut the man on the ___ and then we start to dance", 
                 "answer": "jukebox", 
-                "translation_ru": "Мои руки на твоей талии, включи музыку в автомате. И мы начинаем танцевать"
+                "translation_ru": "Мои руки на твоей талии, пожалуйста, остановись. Включи музыку в автомате, и мы начнем танцевать"
             },
-
-            # ПЕРЕХОД
             {
                 "file": "sh_9.mp4", 
                 "text": "You know I want your love\nYour love was ___ for somebody like me", 
                 "answer": "handmade", 
-                "translation_ru": "Ты знаешь, я хочу твоей любви. Твоя любовь была создана вручную специально для такого, как я"
+                "translation_ru": "Ты знаешь, я хочу твоей любви. Твоя любовь была создана вручную для кого-то вроде меня"
             },
             {
                 "file": "sh_11.mp4", 
                 "text": "Come on now, follow my lead\nI'm in love with the ___ of you", 
                 "answer": "shape", 
-                "translation_ru": "Давай же, следуй за мной. Я влюблен в твои очертания (фигуру)"
+                "translation_ru": "Давай же, следуй за мной. Я влюблен в твои формы"
             },
-
-            # ПРИПЕВ
             {
                 "file": "sh_13.mp4", 
                 "text": "We push and pull like a magnet do\nAlthough my heart is ___ too", 
                 "answer": "falling", 
-                "translation_ru": "Мы притягиваемся и отталкиваемся как магниты. Хотя моё сердце тоже влюбляется (падает)"
+                "translation_ru": "Мы притягиваемся и отталкиваемся как магниты. Хотя мое сердце тоже влюбляется"
             },
             {
                 "file": "sh_15.mp4", 
