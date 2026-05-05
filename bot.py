@@ -135,9 +135,9 @@ SONGS = [
                 "translation_ru": "Теперь мои простыни пахнут тобой. Каждый день открываю для себя что-то совершенно новое"
             }
         ]
-    ]
-},
-]
+    },
+ ]
+    
 
 # --- KEYBOARDS ---
 main_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="Play")], [KeyboardButton(text="My score")]], resize_keyboard=True)
