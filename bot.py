@@ -75,6 +75,7 @@ SONGS = [
             {"file": "fl_12.mp4", "text": "I can take myself dancing\nAnd I can hold my ___ hand", "answer": "own", "translation_ru": "Я могу сама держать свою руку."},
             {"file": "fl_13.mp4", "text": "Yeah, I can ___ me better\nThan you can", "answer": "love", "translation_ru": "Да, я могу любить себя лучше."}
         ],
+    },
     {
     "id": "ed_sheeran_shape",
     "title": "Shape of You - Ed Sheeran",
