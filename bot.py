@@ -155,6 +155,7 @@ async def send_fragment(message: Message, user_id: int):
     song = get_song_by_id(data["song_id"])
     idx = data["fragment_index"]
     
+    # Проверка на завершение песни
     if idx >= len(song["fragments"]):
         if user_id in current_question: 
             del current_question[user_id]
@@ -163,71 +164,86 @@ async def send_fragment(message: Message, user_id: int):
 
     fragment = song["fragments"][idx]
     
-    # Отправляем текст вопроса
+    # 1. Отправляем текст вопроса (строго один раз)
     await message.answer(
-        f"Song: {song['title']}\nFragment {idx + 1}/{len(song['fragments'])}\n\nFill in the missing word:\n{fragment['text']}"
+        f"Song: {song['title']}\nFragment {idx + 1}/{len(song['fragments'])}\n\n"
+        f"Fill in the missing word:\n{fragment['text']}"
     )
 
-    # Отправляем только ОДИН кружок video_note с помощью FSInputFile
+    # 2. Определяем путь к уже нарезанному файлу
     video_note_path = os.path.join("audio", fragment["file"])
+    
+    # 3. Отправляем ОДИН кружок
     if os.path.exists(video_note_path):
         await message.bot.send_video_note(
             chat_id=message.chat.id, 
             video_note=FSInputFile(video_note_path)
         )
     else:
-        await message.answer("⚠️ Файл не найден. Проверь папку audio.")
-    
-    # Путь к нашему нарезанному файлу
-    video_note_path = os.path.join("audio", fragment["file"])
-    
-    if os.path.exists(video_note_path):
-        await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(video_note_path))
-    else:
-        await message.answer("⚠️ Файл не найден. Проверь папку audio.")
-    
-    # Просто берем готовый файл
-    video_note_path = os.path.join("audio", fragment["file"])
-    
-    if os.path.exists(video_note_path):
-        await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(video_note_path))
-    else:
-        await message.answer("⚠️ File not found. Please check 'audio' folder.")
-    
-    source_path = os.path.join("audio", song["file"])
-    video_note_path = build_video_note_clip(source_path, float(fragment["start"]), float(fragment["end"]))
-    if video_note_path:
-        await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(video_note_path))
-        if os.path.exists(video_note_path): os.remove(video_note_path)
-
+        await message.answer(f"⚠️ File not found: {fragment['file']}. Check 'audio' folder.")
 async def check_answer(message: Message):
     user_id = message.from_user.id
-    if user_id not in current_question: return
-    
+    if user_id not in current_question:
+        return 
+
     data = current_question[user_id]
-    if data.get("awaiting_next") or data.get("awaiting_continue"): return
+    
+    # Если бот ждет нажатия кнопки (Next/Continue), игнорируем повторный ввод текста
+    if data.get("awaiting_next") or data.get("awaiting_continue"):
+        return
 
     song = get_song_by_id(data["song_id"])
     idx = data["fragment_index"]
     fragment = song["fragments"][idx]
     
-    if message.text.lower().strip() == fragment["answer"].lower().strip():
+    # Сверяем ответ (убираем пробелы и приводим к нижнему регистру)
+    user_answer = message.text.lower().strip()
+    correct_answer = fragment["answer"].lower().strip()
+
+    if user_answer == correct_answer:
         score = add_score(user_id, 1)
-        trans = format_translation_markdown(fragment["translation_ru"])
+        # Безопасно форматируем перевод
+        trans_text = fragment.get("translation_ru", "No translation available")
+        trans = format_translation_markdown(trans_text)
         
+        # 1. Если это был последний фрагмент песни
         if idx >= len(song["fragments"]) - 1:
             del current_question[user_id]
-            await message.answer(f"Correct! (Total: {score} ⭐)\n\nTranslation: {trans}\n\n🔥 Song Finished!", reply_markup=main_kb, parse_mode="Markdown")
+            await message.answer(
+                f"✅ **Correct!** (Total: {score} ⭐)\n\n"
+                f"**Translation:** {trans}\n\n"
+                f"🔥 **Song Finished!**", 
+                reply_markup=main_kb, 
+                parse_mode="Markdown"
+            )
             return await show_songs_menu(message)
 
-        if (data["song_id"] == "beatles_yesterday" and idx == 4):
+        # 2. Спец-условие для Yesterday (пауза на 4-м фрагменте)
+        if data["song_id"] == "beatles_yesterday" and idx == 4:
             data["awaiting_continue"] = True
-            await message.answer(f"Correct! (Total: {score} ⭐)\n\nTranslation: {trans}\n\nFirst part done! Continue?", reply_markup=pause_choice_kb, parse_mode="Markdown")
+            await message.answer(
+                f"✅ **Correct!** (Total: {score} ⭐)\n\n"
+                f"**Translation:** {trans}\n\n"
+                f"First part done! Continue?", 
+                reply_markup=pause_choice_kb, 
+                parse_mode="Markdown"
+            )
+        
+        # 3. Обычный переход к следующему фрагменту
         else:
             data["awaiting_next"] = True
-            await message.answer(f"Correct! (Total: {score} ⭐)\n\nTranslation: {trans}", reply_markup=next_fragment_kb, parse_mode="Markdown")
+            await message.answer(
+                f"✅ **Correct!** (Total: {score} ⭐)\n\n"
+                f"**Translation:** {trans}", 
+                reply_markup=next_fragment_kb, 
+                parse_mode="Markdown"
+            )
     else:
-        await message.answer(f"Not quite. Correct word: *{fragment['answer']}*", parse_mode="Markdown")
+        # Если ответ неверный
+        await message.answer(
+            f"❌ Not quite. Correct word: *{fragment['answer']}*", 
+            parse_mode="Markdown"
+        )
 
 async def next_fragment(message: Message):
     user_id = message.from_user.id
