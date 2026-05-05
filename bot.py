@@ -149,20 +149,34 @@ def format_translation_markdown(text: str) -> str:
 # --- CORE LOGIC ---
 async def send_fragment(message: Message, user_id: int):
     data = current_question.get(user_id)
-    if not data: return await show_songs_menu(message)
+    if not data: 
+        return await show_songs_menu(message)
 
     song = get_song_by_id(data["song_id"])
     idx = data["fragment_index"]
     
     if idx >= len(song["fragments"]):
-        if user_id in current_question: del current_question[user_id]
+        if user_id in current_question: 
+            del current_question[user_id]
         await message.answer("🎉 You've finished this song!", reply_markup=main_kb)
         return await show_songs_menu(message)
 
     fragment = song["fragments"][idx]
     
     # Отправляем текст вопроса
-    await message.answer(f"Song: {song['title']}\nFragment {idx + 1}/{len(song['fragments'])}\n\nFill in the missing word:\n{fragment['text']}")
+    await message.answer(
+        f"Song: {song['title']}\nFragment {idx + 1}/{len(song['fragments'])}\n\nFill in the missing word:\n{fragment['text']}"
+    )
+
+    # Отправляем только ОДИН кружок video_note с помощью FSInputFile
+    video_note_path = os.path.join("audio", fragment["file"])
+    if os.path.exists(video_note_path):
+        await message.bot.send_video_note(
+            chat_id=message.chat.id, 
+            video_note=FSInputFile(video_note_path)
+        )
+    else:
+        await message.answer("⚠️ Файл не найден. Проверь папку audio.")
     
     # Путь к нашему нарезанному файлу
     video_note_path = os.path.join("audio", fragment["file"])
