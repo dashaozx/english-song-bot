@@ -59,23 +59,22 @@ SONGS = [
     {
         "id": "miley_flowers",
         "title": "Flowers - Miley Cyrus",
-        "file": "flowers.mp4",
         "fragments": [
-            {"start": 7.0, "end": 15.0, "text": "We were good, we were gold\nKind of dream that can't be ___", "answer": "sold", "translation_ru": "Мы были хороши, мы были золотом. Мечта, которую нельзя продать."},
-            {"start": 15.5, "end": 23.0, "text": "We were right 'til we weren't\nBuilt a ___ and watched it burn", "answer": "home", "translation_ru": "Мы были правы, пока не ошиблись. Построили дом и смотрели, как он горит."},
-            {"start": 23.5, "end": 32.0, "text": "I didn't wanna leave you, I didn't wanna ___\nStarted to cry, but then remembered I", "answer": "lie", "translation_ru": "Я не хотела уходить, я не хотела лгать. Начала плакать, но потом вспомнила..."},
-            {"start": 32.5, "end": 41.0, "text": "I can buy myself ___\nWrite my name in the sand", "answer": "flowers", "translation_ru": "Я могу сама купить себе цветы. Написать своё имя на песке."},
-            {"start": 41.5, "end": 49.0, "text": "Talk to myself for ___\nSay things you don't understand", "answer": "hours", "translation_ru": "Разговаривать с собой часами. Говорить вещи, которые ты не понимаешь."},
-            {"start": 49.0, "end": 56.0, "text": "I can take myself ___\nAnd I can hold my own hand", "answer": "dancing", "translation_ru": "Я могу сама пойти танцевать. И я могу сама держать себя за руку."},
-            {"start": 56.5, "end": 62.0, "text": "Yeah, I can ___ me better\nThan you can", "answer": "love", "translation_ru": "Да, я могу любить себя лучше, чем ты."},
-            {"start": 68.0, "end": 76.0, "text": "Paint my nails cherry ___\nMatch the roses that you left", "answer": "red", "translation_ru": "Крашу ногти в вишнево-красный. Под цвет роз, которые ты оставил."},
-            {"start": 76.5, "end": 85.0, "text": "No remorse, no ___\nI forgive every word you said", "answer": "regret", "translation_ru": "Ни раскаяния, ни сожаления. Я прощаю каждое твое слово."},
-            {"start": 85.5, "end": 93.0, "text": "I didn't wanna leave you, baby, I didn't wanna ___\nStarted to cry, but then remembered I", "answer": "fight", "translation_ru": "Я не хотела уходить, малыш, я не хотела ссориться. Начала плакать, но потом вспомнила..."},
-            {"start": 93.5, "end": 101.0, "text": "I can buy myself flowers\nWrite my ___ in the sand", "answer": "name", "translation_ru": "Я могу сама купить себе цветы. Написать своё имя на песке."},
-            {"start": 101.5, "end": 109.0, "text": "Talk to myself for ___\nSay things you don't understand", "answer": "hours", "translation_ru": "Разговаривать с собой часами. Говорить вещи, которые ты не понимаешь."},
-            {"start": 109.5, "end": 117.0, "text": "I can take myself dancing\nAnd I can hold my ___ hand", "answer": "own", "translation_ru": "Я могу сама пойти танцевать. И я могу сама держать свою руку."},
-            {"start": 117.5, "end": 123.0, "text": "Yeah, I can ___ me better\nThan you can", "answer": "love", "translation_ru": "Да, я могу любить себя лучше, чем ты можешь."}
-        ], # Запятая после списка фрагментов
+            {"file": "fl_0.mp4", "text": "We were good, we were gold\nKind of dream that can't be ___", "answer": "sold", "translation_ru": "Мы были хороши, мы были золотом."},
+            {"file": "fl_1.mp4", "text": "We were right 'til we weren't\nBuilt a ___ and watched it burn", "answer": "home", "translation_ru": "Построили дом и смотрели, как он горит."},
+            {"file": "fl_2.mp4", "text": "I didn't wanna leave you, I didn't wanna ___\nStarted to cry, but then remembered I", "answer": "lie", "translation_ru": "Я не хотела уходить, я не хотела лгать."},
+            {"file": "fl_3.mp4", "text": "I can buy myself ___\nWrite my name in the sand", "answer": "flowers", "translation_ru": "Я могу сама купить себе цветы."},
+            {"file": "fl_4.mp4", "text": "Talk to myself for ___\nSay things you don't understand", "answer": "hours", "translation_ru": "Разговаривать с собой часами."},
+            {"file": "fl_5.mp4", "text": "I can take myself ___\nAnd I can hold my own hand", "answer": "dancing", "translation_ru": "Я могу сама пойти танцевать."},
+            {"file": "fl_6.mp4", "text": "Yeah, I can ___ me better\nThan you can", "answer": "love", "translation_ru": "Да, я могу любить себя лучше."},
+            {"file": "fl_7.mp4", "text": "Paint my nails cherry ___\nMatch the roses that you left", "answer": "red", "translation_ru": "Крашу ногти в вишнево-красный."},
+            {"file": "fl_8.mp4", "text": "No remorse, no ___\nI forgive every word you said", "answer": "regret", "translation_ru": "Ни раскаяния, ни сожаления."},
+            {"file": "fl_9.mp4", "text": "I didn't wanna leave you, baby, I didn't wanna ___\nStarted to cry, but then remembered I", "answer": "fight", "translation_ru": "Я не хотела ссориться."},
+            {"file": "fl_10.mp4", "text": "I can buy myself flowers\nWrite my ___ in the sand", "answer": "name", "translation_ru": "Написать своё имя на песке."},
+            {"file": "fl_11.mp4", "text": "Talk to myself for ___\nSay things you don't understand", "answer": "hours", "translation_ru": "Разговаривать с собой часами."},
+            {"file": "fl_12.mp4", "text": "I can take myself dancing\nAnd I can hold my ___ hand", "answer": "own", "translation_ru": "Я могу сама держать свою руку."},
+            {"file": "fl_13.mp4", "text": "Yeah, I can ___ me better\nThan you can", "answer": "love", "translation_ru": "Да, я могу любить себя лучше."}
+        ],
     },
     {
         "id": "ed_shape_of_you",
@@ -146,7 +145,25 @@ async def send_fragment(message: Message, user_id: int):
         return await show_songs_menu(message)
 
     fragment = song["fragments"][idx]
-    await message.answer(f"Song: {song['title']}\nFragment {idx + 1}/{len(song['fragments'])}\n\nFill in the missing word:\n{escape_markdown(fragment['text'])}", parse_mode="Markdown")
+    
+    # Отправляем текст вопроса
+    await message.answer(f"Song: {song['title']}\nFragment {idx + 1}/{len(song['fragments'])}\n\nFill in the missing word:\n{fragment['text']}")
+    
+    # Путь к нашему нарезанному файлу
+    video_note_path = os.path.join("audio", fragment["file"])
+    
+    if os.path.exists(video_note_path):
+        await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(video_note_path))
+    else:
+        await message.answer("⚠️ Файл не найден. Проверь папку audio.")
+    
+    # Просто берем готовый файл
+    video_note_path = os.path.join("audio", fragment["file"])
+    
+    if os.path.exists(video_note_path):
+        await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(video_note_path))
+    else:
+        await message.answer("⚠️ File not found. Please check 'audio' folder.")
     
     source_path = os.path.join("audio", song["file"])
     video_note_path = build_video_note_clip(source_path, float(fragment["start"]), float(fragment["end"]))
