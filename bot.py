@@ -79,62 +79,27 @@ SONGS = [
     {
     "id": "ed_sheeran_shape",
     "title": "Shape of You - Ed Sheeran",
-    "fragments": [
-            {
-                "file": "sh_0.mp4", 
-                "text": "The club isn't the best place to find a lover\nSo the bar is where I ___", 
-                "answer": "head", 
-                "translation_ru": "Клуб — не лучшее место, чтобы найти любовь, поэтому я направляюсь в бар"
-            },
-            {
-                "file": "sh_2.mp4", 
-                "text": "Me and my friends at the table doing shots\nDrinking fast and then we ___ slow", 
-                "answer": "talk", 
-                "translation_ru": "Я и мои друзья за столом пьем шоты. Пьем быстро, а потом болтаем не спеша"
-            },
-            {
-                "file": "sh_4.mp4", 
-                "text": "And you come over and start up a conversation with just me\nAnd trust me I'll give it a ___", 
-                "answer": "chance", 
-                "translation_ru": "Ты подходишь и заводишь разговор только со мной. И поверь мне, я дам этому шанс"
-            },
-            {
-                "file": "sh_6.mp4", 
-                "text": "Now my hands on your waist, please stop\nPut the man on the ___ and then we start to dance", 
-                "answer": "jukebox", 
-                "translation_ru": "Мои руки на твоей талии, пожалуйста, остановись. Включи музыку в автомате, и мы начнем танцевать"
-            },
-            {
-                "file": "sh_9.mp4", 
-                "text": "You know I want your love\nYour love was ___ for somebody like me", 
-                "answer": "handmade", 
-                "translation_ru": "Ты знаешь, я хочу твоей любви. Твоя любовь была создана вручную для кого-то вроде меня"
-            },
-            {
-                "file": "sh_11.mp4", 
-                "text": "Come on now, follow my lead\nI'm in love with the ___ of you", 
-                "answer": "shape", 
-                "translation_ru": "Давай же, следуй за мной. Я влюблен в твои формы"
-            },
-            {
-                "file": "sh_13.mp4", 
-                "text": "We push and pull like a magnet do\nAlthough my heart is ___ too", 
-                "answer": "falling", 
-                "translation_ru": "Мы притягиваемся и отталкиваемся как магниты. Хотя мое сердце тоже влюбляется"
-            },
-            {
-                "file": "sh_15.mp4", 
-                "text": "I'm in love with your body\nAnd last night you were in my ___", 
-                "answer": "room", 
-                "translation_ru": "Я влюблен в твое тело. Вчера вечером ты была в моей комнате"
-            },
-            {
-                "file": "sh_17.mp4", 
-                "text": "Now my bedsheets smell like you\nEvery day ___ something brand new", 
-                "answer": "discovering", 
-                "translation_ru": "Теперь мои простыни пахнут тобой. Каждый день открываю для себя что-то совершенно новое"
-            }
-        ]
+   "fragments": [
+            {"file": "sh_0.mp4", "text": "The club isn't the best place to find a ___", "answer": "lover", "translation_ru": "Клуб — не лучшее место, чтобы найти любовь"},
+            {"file": "sh_1.mp4", "text": "So the bar is where I ___", "answer": "head", "translation_ru": "Поэтому я направляюсь в бар (вместо простого 'go')"},
+            {"file": "sh_2.mp4", "text": "Me and my friends at the table doing ___", "answer": "shots", "translation_ru": "Я и мои друзья за столом пьем шоты"},
+            {"file": "sh_3.mp4", "text": "Drinking fast and then we talk ___", "answer": "slow", "translation_ru": "Пьем быстро, а потом болтаем не спеша"},
+            {"file": "sh_4.mp4", "text": "And you come over and start up a ___ with just me", "answer": "conversation", "translation_ru": "Ты подходишь и заводишь разговор только со мной"},
+            {"file": "sh_5.mp4", "text": "And trust me I'll give it a ___", "answer": "chance", "translation_ru": "И поверь мне, я дам этому шанс"},
+            {"file": "sh_6.mp4", "text": "Now my hands on your waist, please stop\nPut the man on the ___", "answer": "jukebox", "translation_ru": "Мои руки на твоей талии, пожалуйста, остановись. Включи музыку в автомате"},
+            {"file": "sh_7.mp4", "text": "And then we start to ___", "answer": "dance", "translation_ru": "И тогда мы начинаем танцевать"},
+            {"file": "sh_8.mp4", "text": "And now I'm singing like...", "answer": "girl", "translation_ru": "И теперь я пою..."},
+            {"file": "sh_9.mp4", "text": "You know I want your ___", "answer": "love", "translation_ru": "Ты знаешь, я хочу твоей любви"},
+            {"file": "sh_10.mp4", "text": "Your love was ___ for somebody like me", "answer": "handmade", "translation_ru": "Твоя любовь была создана вручную для кого-то вроде меня"},
+            {"file": "sh_11.mp4", "text": "Come on now, follow my ___", "answer": "lead", "translation_ru": "Давай же, следуй за мной (будь ведомой)"},
+            {"file": "sh_12.mp4", "text": "I'm in love with the ___ of you", "answer": "shape", "translation_ru": "Я влюблен в твои формы (очертания)"},
+            {"file": "sh_13.mp4", "text": "We push and pull like a ___ do", "answer": "magnet", "translation_ru": "Мы притягиваемся и отталкиваемся как магниты"},
+            {"file": "sh_14.mp4", "text": "Although my heart is ___ too", "answer": "falling", "translation_ru": "Хотя мое сердце тоже влюбляется (падает)"},
+            {"file": "sh_15.mp4", "text": "I'm in love with your ___", "answer": "body", "translation_ru": "Я влюблен в твое тело"},
+            {"file": "sh_16.mp4", "text": "And last night you were in my ___", "answer": "room", "translation_ru": "Вчера вечером ты была в моей комнате"},
+            {"file": "sh_17.mp4", "text": "Now my bedsheets smell like ___", "answer": "you", "translation_ru": "Теперь мои простыни пахнут тобой"},
+            {"file": "sh_18.mp4", "text": "Every day ___ something brand new", "answer": "discovering", "translation_ru": "Каждый день открываю для себя что-то совершенно новое"}
+        ] 
     },
  ]
     
