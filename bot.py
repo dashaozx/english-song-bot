@@ -96,8 +96,8 @@ SONGS = [
             {"file": "sh_14.mp4", "text": "We talk for hours and hours about the sweet and the ___\nAnd how your family is doing okay", "answer": "sour", "translation_ru": "Мы часами болтаем о приятном и горьком."},
             {"file": "sh_15.mp4", "text": "Leave and get in a taxi, then kiss in the back ___\nTell the driver make the radio play", "answer": "seat", "translation_ru": "Садимся в такси, целуемся на заднем сиденье."},
             {"file": "sh_16.mp4", "text": "And I'm singing like\nGirl, you know I want your ___", "answer": "love", "translation_ru": "И я пою: «Девочка, я хочу твоей любви»."},
-            {"file": "sh_17.mp4", "text": "I'm in love with the shape of ___\nWe push and pull like a magnet do", "answer": "you", "translation_ru": "Я влюблен в твой силуэт."},
-            {"file": "sh_18.mp4", "text": "Every day discovering something ___\nI'm in love with your body", "answer": "new", "translation_ru": "Каждый день открываю в тебе что-то новое."}
+            {"file": "sh_17.mp4", "text": "Come on now, follow my lead\nI may be crazy, don't mind me\nSay, boy, let's not talk too ___\nGrab on my waist and put that body on me", "answer": "much", "translation_ru": "Давай, следуй за мной. Я могу быть сумасшедшим, не обращай внимания. Парень, давай не будем много болтать."},
+            {"file": "sh_18.mp4", "text": "Come on now, follow my lead\nCome, come on now, follow my ___", "answer": "lead", "translation_ru": "Давай же, следуй за мной."}
         ]
     },
  ]
