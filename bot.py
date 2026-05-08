@@ -33,16 +33,17 @@ SONGS = [
         "id": "the_beatles_yesterday",
         "title": "Yesterday - The Beatles",
         "fragments": [
-            {"file": "yesterday.mp4", "text": "(11-18 сек)\nYesterday, all my troubles seemed so far ___", "answer": "away", "translation_ru": "Вчера все мои беды казались такими далекими."},
-            {"file": "yesterday.mp4", "text": "(18.5-23 сек)\nNow it looks as though they're here to ___", "answer": "stay", "translation_ru": "Теперь кажется, что они здесь надолго."},
-            {"file": "yesterday.mp4", "text": "(23.5-30 сек)\nOh, I believe in yesterday.\n___", "answer": "Suddenly", "translation_ru": "О, я верю во вчерашний день. Внезапно..."},
-            {"file": "yesterday.mp4", "text": "(30.5-35 сек)\nI'm not half the ___ I used to be", "answer": "man", "translation_ru": "Я уже и наполовину не тот человек."},
-            {"file": "yesterday.mp4", "text": "(35.5-40 сек)\nThere's a ___ hanging over me", "answer": "shadow", "translation_ru": "Надо мной нависла тень."},
-            {"file": "yesterday.mp4", "text": "(40.5-45 сек)\nOh, yesterday came ___", "answer": "suddenly", "translation_ru": "О, вчера наступило внезапно."},
-            {"file": "yesterday.mp4", "text": "(45.5-55 сек)\nWhy she had to ___ I don't know, she wouldn't say", "answer": "go", "translation_ru": "Почему ей пришлось уйти?"},
-            {"file": "yesterday.mp4", "text": "(55.5-66 сек)\nI said something wrong,\nNow I ___ for yesterday", "answer": "long", "translation_ru": "Теперь я тоскую по вчерашнему дню."},
-            {"file": "yesterday.mp4", "text": "(66.5-75 сек)\nYesterday, love was such an ___ game to play", "answer": "easy", "translation_ru": "Вчера любовь была простой игрой."},
-            {"file": "yesterday.mp4", "text": "(75.5-84 сек)\nNow I need a place to hide away.\nOh, I ___ in yesterday", "answer": "believe", "translation_ru": "О, я верю во вчерашний день."}
+          "fragments": [
+            {"file": "yesterday.mp4", "start": 11, "end": 18, "text": "Yesterday, all my troubles seemed so far ___", "answer": "away", "translation_ru": "Вчера все мои беды казались такими далекими."},
+            {"file": "yesterday.mp4", "start": 18.5, "end": 23, "text": "Now it looks as though they're here to ___", "answer": "stay", "translation_ru": "Теперь кажется, что они здесь надолго."},
+            {"file": "yesterday.mp4", "start": 23.5, "end": 30, "text": "Oh, I believe in yesterday.\n___", "answer": "Suddenly", "translation_ru": "О, я верю во вчерашний день. Внезапно..."},
+            {"file": "yesterday.mp4", "start": 30.5, "end": 35, "text": "I'm not half the ___ I used to be", "answer": "man", "translation_ru": "Я уже и наполовину не тот человек."},
+            {"file": "yesterday.mp4", "start": 35.5, "end": 40, "text": "There's a ___ hanging over me", "answer": "shadow", "translation_ru": "Надо мной нависла тень."},
+            {"file": "yesterday.mp4", "start": 40.5, "end": 45, "text": "Oh, yesterday came ___", "answer": "suddenly", "translation_ru": "О, вчера наступило внезапно."},
+            {"file": "yesterday.mp4", "start": 45.5, "end": 55, "text": "Why she had to ___ I don't know, she wouldn't say", "answer": "go", "translation_ru": "Почему ей пришлось уйти?"},
+            {"file": "yesterday.mp4", "start": 55.5, "end": 66, "text": "I said something wrong,\nNow I ___ for yesterday", "answer": "long", "translation_ru": "Теперь я тоскую по вчерашнему дню."},
+            {"file": "yesterday.mp4", "start": 66.5, "end": 75, "text": "Yesterday, love was such an ___ game to play", "answer": "easy", "translation_ru": "Вчера любовь была простой игрой."},
+            {"file": "yesterday.mp4", "start": 75.5, "end": 84, "text": "Now I need a place to hide away.\nOh, I ___ in yesterday", "answer": "believe", "translation_ru": "О, я верю во вчерашний день."}
         ]
     },
     {
@@ -130,19 +131,35 @@ async def send_fragment(message: Message, user_id: int):
     if not data: return await show_songs_menu(message)
     song = get_song_by_id(data["song_id"])
     idx = data["fragment_index"]
-    if idx >= len(song["fragments"]):
-        if user_id in current_question: del current_question[user_id]
-        return await message.answer("🎉 Finished!", reply_markup=main_kb)
-
     fragment = song["fragments"][idx]
-    await message.answer(f"Song: {song['title']}\nFragment {idx + 1}/{len(song['fragments'])}\n\nFill in the missing word:\n{fragment['text']}")
+    
+    await message.answer(f"Song: {song['title']}\nFragment {idx + 1}/{len(song['fragments'])}\n\n{fragment['text']}")
     
     file_path = os.path.join("audio", fragment["file"])
-    if os.path.exists(file_path):
-        # ОТПРАВЛЯЕМ КРУГЛОЕ ВИДЕО
-        await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(file_path))
+    
+    if data["song_id"] == "the_beatles_yesterday":
+        # Нарезаем видео по таймингу для Yesterday
+        start = fragment["start"]
+        duration = fragment["end"] - start
+        temp_output = os.path.join(tempfile.gettempdir(), f"cut_{uuid.uuid4().hex}.mp4")
+        
+        # Команда FFmpeg для нарезки, превращения в квадрат (crop) и подготовки для Telegram
+        cmd = [
+            "ffmpeg", "-y", "-ss", str(start), "-i", file_path, "-t", str(duration),
+            "-vf", "crop='min(iw,ih)':'min(iw,ih)',scale=480:480", 
+            "-c:v", "libx264", "-preset", "veryfast", "-c:a", "aac", temp_output
+        ]
+        
+        process = subprocess.run(cmd, capture_output=True)
+        if process.returncode == 0:
+            await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(temp_output))
+            os.remove(temp_output) # Удаляем временный файл
+        else:
+            await message.answer("⚠️ Ошибка обработки видео Yesterday.")
     else:
-        await message.answer(f"⚠️ File not found: {fragment['file']}")
+        # Для остальных песен (где уже есть нарезанные куски fl_0, sh_0 и т.д.)
+        if os.path.exists(file_path):
+            await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(file_path))
 
 async def check_answer(message: Message):
     user_id = message.from_user.id
