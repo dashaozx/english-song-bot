@@ -40,15 +40,15 @@ SONGS = [
             {"file": "yesterday.mp4", "text": "(11-18 сек)\nYesterday, all my troubles seemed so far ___", "answer": "away", "translation_ru": "Вчера все мои беды казались такими далекими."},
             {"file": "yesterday.mp4", "text": "(18.5-23 сек)\nNow it looks as though they're here to ___", "answer": "stay", "translation_ru": "Теперь кажется, что они здесь надолго."},
             {"file": "yesterday.mp4", "text": "(23.5-30 сек)\nOh, I believe in yesterday.\n___", "answer": "Suddenly", "translation_ru": "О, я верю во вчерашний день. Внезапно..."},
-            {"file": "yesterday.mp4", "text": "(30.5-35 сек)\nI'm not half the ___ I used to be", "answer": "man", "translation_ru": "Я уже и наполовину не тот человек, которым был раньше."},
+            {"file": "yesterday.mp4", "text": "(30.5-35 сек)\nI'm not half the ___ I used to be", "answer": "man", "translation_ru": "Я уже и наполовину не тот человек."},
             {"file": "yesterday.mp4", "text": "(35.5-40 сек)\nThere's a ___ hanging over me", "answer": "shadow", "translation_ru": "Надо мной нависла тень."},
             {"file": "yesterday.mp4", "text": "(40.5-45 сек)\nOh, yesterday came ___", "answer": "suddenly", "translation_ru": "О, вчера наступило внезапно."},
-            {"file": "yesterday.mp4", "text": "(45.5-55 сек)\nWhy she had to ___ I don't know, she wouldn't say", "answer": "go", "translation_ru": "Почему ей пришлось уйти? Я не знаю, она не сказала."},
-            {"file": "yesterday.mp4", "text": "(55.5-66 сек)\nI said something wrong,\nNow I ___ for yesterday", "answer": "long", "translation_ru": "Я сказал что-то не то, теперь я тоскую по вчерашнему дню."},
-            {"file": "yesterday.mp4", "text": "(66.5-75 сек)\nYesterday, love was such an ___ game to play", "answer": "easy", "translation_ru": "Вчера любовь была такой простой игрой."},
-            {"file": "yesterday.mp4", "text": "(75.5-84 сек)\nNow I need a place to hide away.\nOh, I ___ in yesterday", "answer": "believe", "translation_ru": "Теперь мне нужно место, чтобы спрятаться. О, я верю во вчерашний день."}
+            {"file": "yesterday.mp4", "text": "(45.5-55 сек)\nWhy she had to ___ I don't know, she wouldn't say", "answer": "go", "translation_ru": "Почему ей пришлось уйти?"},
+            {"file": "yesterday.mp4", "text": "(55.5-66 сек)\nI said something wrong,\nNow I ___ for yesterday", "answer": "long", "translation_ru": "Теперь я тоскую по вчерашнему дню."},
+            {"file": "yesterday.mp4", "text": "(66.5-75 сек)\nYesterday, love was such an ___ game to play", "answer": "easy", "translation_ru": "Вчера любовь была простой игрой."},
+            {"file": "yesterday.mp4", "text": "(75.5-84 сек)\nNow I need a place to hide away.\nOh, I ___ in yesterday", "answer": "believe", "translation_ru": "О, я верю во вчерашний день."}
         ]
-    }
+    },
     {
         "id": "miley_flowers",
         "title": "Flowers - Miley Cyrus",
