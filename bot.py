@@ -33,16 +33,16 @@ SONGS = [
         "id": "the_beatles_yesterday",
         "title": "Yesterday - The Beatles",
         "fragments": [
-            {"file": "yesterday.mp4", "start": 11, "end": 18, "text": "Yesterday, all my troubles seemed so far ___", "answer": "away", "translation_ru": "Вчера все мои беды казались такими далекими."},
-            {"file": "yesterday.mp4", "start": 18.5, "end": 23, "text": "Now it looks as though they're here to ___", "answer": "stay", "translation_ru": "Теперь кажется, что они здесь надолго."},
-            {"file": "yesterday.mp4", "start": 23.5, "end": 30, "text": "Oh, I believe in yesterday.\n___", "answer": "Suddenly", "translation_ru": "О, я верю во вчерашний день. Внезапно..."},
-            {"file": "yesterday.mp4", "start": 30.5, "end": 35, "text": "I'm not half the ___ I used to be", "answer": "man", "translation_ru": "Я уже и наполовину не тот человек, которым был раньше."},
-            {"file": "yesterday.mp4", "start": 35.5, "end": 40, "text": "There's a ___ hanging over me", "answer": "shadow", "translation_ru": "Надо мной нависла тень."},
-            {"file": "yesterday.mp4", "start": 40.5, "end": 45, "text": "Oh, yesterday came ___", "answer": "suddenly", "translation_ru": "О, вчера наступило внезапно."},
-            {"file": "yesterday.mp4", "start": 45.5, "end": 55, "text": "Why she had to ___ I don't know, she wouldn't say", "answer": "go", "translation_ru": "Почему ей пришлось уйти? Я не знаю, она не сказала."},
-            {"file": "yesterday.mp4", "start": 55.5, "end": 66, "text": "I said something wrong,\nNow I ___ for yesterday", "answer": "long", "translation_ru": "Я сказал что-то не то, теперь я тоскую по вчерашнему дню."},
-            {"file": "yesterday.mp4", "start": 66.5, "end": 75, "text": "Yesterday, love was such an ___ game to play", "answer": "easy", "translation_ru": "Вчера любовь была такой простой игрой."},
-            {"file": "yesterday.mp4", "start": 75.5, "end": 84, "text": "Now I need a place to hide away.\nOh, I ___ in yesterday", "answer": "believe", "translation_ru": "Теперь мне нужно место, чтобы спрятаться. О, я верю во вчерашний день."}
+            {"file": "y_0.mp4", "text": "Yesterday, all my troubles seemed so far ___", "answer": "away", "translation_ru": "Вчера все мои беды казались такими далекими."},
+            {"file": "y_1.mp4", "text": "Now it looks as though they're here to ___", "answer": "stay", "translation_ru": "Теперь кажется, что они здесь надолго."},
+            {"file": "y_2.mp4", "text": "Oh, I believe in yesterday.\n___", "answer": "Suddenly", "translation_ru": "О, я верю во вчерашний день."},
+            {"file": "y_3.mp4", "text": "I'm not half the ___ I used to be", "answer": "man", "translation_ru": "Я уже и наполовину не тот человек."},
+            {"file": "y_4.mp4", "text": "There's a ___ hanging over me", "answer": "shadow", "translation_ru": "Надо мной нависла тень."},
+            {"file": "y_5.mp4", "text": "Oh, yesterday came ___", "answer": "suddenly", "translation_ru": "О, вчера наступило внезапно."},
+            {"file": "y_6.mp4", "text": "Why she had to ___ I don't know, she wouldn't say", "answer": "go", "translation_ru": "Почему ей пришлось уйти?"},
+            {"file": "y_7.mp4", "text": "I said something wrong,\nNow I ___ for yesterday", "answer": "long", "translation_ru": "Теперь я тоскую по вчерашнему дню."},
+            {"file": "y_8.mp4", "text": "Yesterday, love was such an ___ game to play", "answer": "easy", "translation_ru": "Вчера любовь была простой игрой."},
+            {"file": "y_9.mp4", "text": "Now I need a place to hide away.\nOh, I ___ in yesterday", "answer": "believe", "translation_ru": "О, я верю во вчерашний день."}
         ]
     },
     {
@@ -136,26 +136,12 @@ async def send_fragment(message: Message, user_id: int):
     
     file_path = os.path.join("audio", fragment["file"])
     
-    # Если это Yesterday и у нас есть тайминги, режем файл на лету
-    if data["song_id"] == "the_beatles_yesterday" and "start" in fragment:
-        start = fragment["start"]
-        duration = fragment["end"] - start
-        temp_output = os.path.join(tempfile.gettempdir(), f"cut_{uuid.uuid4().hex}.mp4")
-        
-        # Команда для нарезки и превращения в круг (квадрат 1:1)
-        cmd = [
-            "ffmpeg", "-y", "-ss", str(start), "-i", file_path, "-t", str(duration),
-            "-vf", "crop='min(iw,ih)':'min(iw,ih)',scale=480:480", 
-            "-c:v", "libx264", "-preset", "veryfast", "-c:a", "aac", temp_output
-        ]
-        
-        if subprocess.run(cmd, capture_output=True).returncode == 0:
-            await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(temp_output))
-            os.remove(temp_output)
+    if os.path.exists(file_path):
+        # Отправляем заранее порезанный файл как кружочек
+        await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(file_path))
     else:
-        # Для Flowers и Shape of You, которые уже порезаны
-        if os.path.exists(file_path):
-            await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(file_path))
+        await message.answer(f"⚠️ Файл {fragment['file']} не найден в папке audio")
+
 async def check_answer(message: Message):
     user_id = message.from_user.id
     if user_id not in current_question or any(current_question[user_id].get(k) for k in ["awaiting_next", "awaiting_continue"]): return
