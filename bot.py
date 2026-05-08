@@ -91,13 +91,13 @@ SONGS = [
             {"file": "sh_9.mp4", "text": "Although my heart is falling ___\nI'm in love with your body", "answer": "too", "translation_ru": "Мое сердце тоже влюбляется."},
             {"file": "sh_10.mp4", "text": "Last night you were in my ___\nAnd now my bedsheets smell like you", "answer": "room", "translation_ru": "Прошлой ночью ты была в моей комнате."},
             {"file": "sh_11.mp4", "text": "Every day discovering something ___\nI'm in love with your body", "answer": "new", "translation_ru": "Каждый день открываю в тебе что-то новое."},
-            {"file": "sh_12.mp4", "text": "Oh—I—oh—I—oh—I—oh—I\nI'm in love with your ___", "answer": "body", "translation_ru": "Я влюблен в твое тело."},
-            {"file": "sh_13.mp4", "text": "Every day discovering something new\nI'm in love with the ___ of you", "answer": "shape", "translation_ru": "Я влюблен в твой силуэт."},
-            {"file": "sh_14.mp4", "text": "One week in we let the story ___\nWe're going out on our first date", "answer": "begin", "translation_ru": "Спустя неделю мы даем истории начаться."},
-            {"file": "sh_15.mp4", "text": "You and me are thrifty, so go all you can ___\nFill up your bag and I’ll fill up a plate", "answer": "eat", "translation_ru": "Идем туда, где «ешь сколько хочешь»."},
-            {"file": "sh_16.mp4", "text": "We talk for hours and hours about the sweet and the ___\nAnd how your family is doing okay", "answer": "sour", "translation_ru": "Мы говорим часами о приятном и горьком."},
-            {"file": "sh_17.mp4", "text": "Leave and get in a taxi, then kiss in the back ___\nTell the driver make the radio play", "answer": "seat", "translation_ru": "Садимся в такси, целуемся на заднем сиденье."},
-            {"file": "sh_18.mp4", "text": "And I'm singing like\nGirl, you know I want your ___", "answer": "love", "translation_ru": "И я пою: «Девочка, я хочу твоей любви»."}
+            {"file": "sh_12.mp4", "text": "One week in we let the story ___\nWe're going out on our first date", "answer": "begin", "translation_ru": "Спустя неделю мы даем истории начаться."},
+            {"file": "sh_13.mp4", "text": "You and me are thrifty, so go all you can ___\nFill up your bag and I’ll fill up a plate", "answer": "eat", "translation_ru": "Идем туда, где «ешь сколько хочешь»."},
+            {"file": "sh_14.mp4", "text": "We talk for hours and hours about the sweet and the ___\nAnd how your family is doing okay", "answer": "sour", "translation_ru": "Мы часами болтаем о приятном и горьком."},
+            {"file": "sh_15.mp4", "text": "Leave and get in a taxi, then kiss in the back ___\nTell the driver make the radio play", "answer": "seat", "translation_ru": "Садимся в такси, целуемся на заднем сиденье."},
+            {"file": "sh_16.mp4", "text": "And I'm singing like\nGirl, you know I want your ___", "answer": "love", "translation_ru": "И я пою: «Девочка, я хочу твоей любви»."},
+            {"file": "sh_17.mp4", "text": "I'm in love with the shape of ___\nWe push and pull like a magnet do", "answer": "you", "translation_ru": "Я влюблен в твой силуэт."},
+            {"file": "sh_18.mp4", "text": "Every day discovering something ___\nI'm in love with your body", "answer": "new", "translation_ru": "Каждый день открываю в тебе что-то новое."}
         ]
     },
  ]
