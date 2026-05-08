@@ -132,7 +132,7 @@ async def send_fragment(message: Message, user_id: int):
     idx = data["fragment_index"]
     fragment = song["fragments"][idx]
     
-    await message.answer(f"Song: {song['title']}\nFragment {idx + 1}/{len(song['fragments'])}\n\n{fragment['text']}")
+    await message.answer_video_note(video_note=FSInputFile(video_path))
     
     file_path = os.path.join("audio", fragment["file"])
     
