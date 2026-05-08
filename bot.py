@@ -73,7 +73,6 @@ SONGS = [
             {"file": "fl_10.mp4", "text": "I can buy myself flowers\nWrite my ___ in the sand", "answer": "name", "translation_ru": "Написать своё имя на песке."},
             {"file": "fl_11.mp4", "text": "Talk to myself for ___\nSay things you don't understand", "answer": "hours", "translation_ru": "Разговаривать с собой часами."},
             {"file": "fl_12.mp4", "text": "I can take myself dancing\nAnd I can hold my ___ hand", "answer": "own", "translation_ru": "Я могу сама держать свою руку."},
-            {"file": "fl_13.mp4", "text": "Yeah, I can ___ me better\nThan you can", "answer": "love", "translation_ru": "Да, я могу любить себя лучше."}
         ],
     },
     {
