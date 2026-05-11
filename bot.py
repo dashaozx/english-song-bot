@@ -127,20 +127,20 @@ def get_song_by_id(song_id: str) -> dict | None:
 
 async def send_fragment(message: Message, user_id: int):
     data = current_question.get(user_id)
-    if not data: return await show_songs_menu(message)
+    if not data:
+        return await show_songs_menu(message)
+
     song = get_song_by_id(data["song_id"])
     idx = data["fragment_index"]
     fragment = song["fragments"][idx]
-    
-    await message.answer_video_note(video_note=FSInputFile(video_path))
-    
+
     file_path = os.path.join("audio", fragment["file"])
-    
     if os.path.exists(file_path):
-        # Отправляем заранее порезанный файл как кружочек
         await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(file_path))
     else:
         await message.answer(f"⚠️ Файл {fragment['file']} не найден в папке audio")
+
+    await message.answer(fragment["text"])
 
 async def check_answer(message: Message):
     user_id = message.from_user.id
@@ -150,7 +150,7 @@ async def check_answer(message: Message):
     fragment = song["fragments"][data["fragment_index"]]
     
     if message.text.lower().strip() == fragment["answer"].lower().strip():
-        score = add_score(user_id, 1)
+        score = add_score(user_id, 10)
         trans = fragment.get("translation_ru", "")
         
         if data["fragment_index"] >= len(song["fragments"]) - 1:
