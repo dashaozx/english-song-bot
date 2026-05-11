@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import os
-import re
 import sqlite3
 from typing import Dict
 
@@ -81,7 +80,7 @@ SONGS = [
             {"file": "sh_10.mp4", "text": "Last night you were in my ___\nAnd now my bedsheets smell like you", "answer": "room", "translation_ru": "Прошлой ночью ты была в моей комнате."},
             {"file": "sh_11.mp4", "text": "Every day discovering something ___\nI'm in love with your body", "answer": "new", "translation_ru": "Каждый день открываю в тебе что-то новое."},
             {"file": "sh_12.mp4", "text": "One week in we let the story ___\nWe're going out on our first date", "answer": "begin", "translation_ru": "Спустя неделю мы даем истории начаться."},
-            {"file": "sh_13.mp4", "text": "You and me are thrifty, so go all you can ___\nFill up your bag and I’ll fill up a plate", "answer": "eat", "translation_ru": "Идем туда, где «ешь сколько хочешь»."},
+            {"file": "sh_13.mp4", "text": "You and me are thrifty, so go all you can ___\nFill up your bag and I'll fill up a plate", "answer": "eat", "translation_ru": "Идем туда, где «ешь сколько хочешь»."},
             {"file": "sh_14.mp4", "text": "We talk for hours and hours about the sweet and the ___\nAnd how your family is doing okay", "answer": "sour", "translation_ru": "Мы говорим часами о приятном и горьком."},
             {"file": "sh_15.mp4", "text": "Leave and get in a taxi, then kiss in the back ___\nTell the driver make the radio play", "answer": "seat", "translation_ru": "Садимся в такси, целуемся на заднем сиденье."},
             {"file": "sh_16.mp4", "text": "And I'm singing like\nGirl, you know I want your ___", "answer": "love", "translation_ru": "И я пою: «Девочка, я хочу твоей любви»."},
@@ -92,9 +91,18 @@ SONGS = [
 ]
 
 # --- KEYBOARDS ---
-main_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="Play")], [KeyboardButton(text="My score")]], resize_keyboard=True)
-next_fragment_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="Next")], [KeyboardButton(text="Play"), KeyboardButton(text="My score")]], resize_keyboard=True)
-pause_choice_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="Continue this song")], [KeyboardButton(text="Choose another song")]], resize_keyboard=True)
+main_kb = ReplyKeyboardMarkup(
+    keyboard=[[KeyboardButton(text="Play")], [KeyboardButton(text="My score")]],
+    resize_keyboard=True
+)
+next_fragment_kb = ReplyKeyboardMarkup(
+    keyboard=[[KeyboardButton(text="Next")], [KeyboardButton(text="Play"), KeyboardButton(text="My score")]],
+    resize_keyboard=True
+)
+pause_choice_kb = ReplyKeyboardMarkup(
+    keyboard=[[KeyboardButton(text="Continue this song")], [KeyboardButton(text="Choose another song")]],
+    resize_keyboard=True
+)
 
 current_question: Dict[int, Dict[str, object]] = {}
 
@@ -107,24 +115,31 @@ def init_db():
     conn.close()
 
 def get_user_score(user_id: int) -> int:
-    conn = sqlite3.connect(DB_PATH); cur = conn.cursor()
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
     cur.execute("SELECT score FROM users WHERE user_id = ?", (user_id,))
     row = cur.fetchone()
     if row is None:
         cur.execute("INSERT INTO users (user_id, score) VALUES (?, 0)", (user_id,))
-        conn.commit(); score = 0
-    else: score = int(row[0])
-    conn.close(); return score
+        conn.commit()
+        score = 0
+    else:
+        score = int(row[0])
+    conn.close()
+    return score
 
 def add_score(user_id: int, points: int) -> int:
-    conn = sqlite3.connect(DB_PATH); cur = conn.cursor()
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
     cur.execute("UPDATE users SET score = score + ? WHERE user_id = ?", (points, user_id))
-    conn.commit(); conn.close()
+    conn.commit()
+    conn.close()
     return get_user_score(user_id)
 
 def get_song_by_id(song_id: str) -> dict | None:
     return next((s for s in SONGS if s["id"] == song_id), None)
 
+# --- ИСПРАВЛЕННАЯ ФУНКЦИЯ ---
 async def send_fragment(message: Message, user_id: int):
     data = current_question.get(user_id)
     if not data:
@@ -144,15 +159,16 @@ async def send_fragment(message: Message, user_id: int):
 
 async def check_answer(message: Message):
     user_id = message.from_user.id
-    if user_id not in current_question or any(current_question[user_id].get(k) for k in ["awaiting_next", "awaiting_continue"]): return
+    if user_id not in current_question or any(current_question[user_id].get(k) for k in ["awaiting_next", "awaiting_continue"]):
+        return
     data = current_question[user_id]
     song = get_song_by_id(data["song_id"])
     fragment = song["fragments"][data["fragment_index"]]
-    
+
     if message.text.lower().strip() == fragment["answer"].lower().strip():
         score = add_score(user_id, 10)
         trans = fragment.get("translation_ru", "")
-        
+
         if data["fragment_index"] >= len(song["fragments"]) - 1:
             del current_question[user_id]
             await message.answer(f"✅ Correct! (Total: {score} ⭐)\n\nTranslation: {trans}\n\n🔥 Song Finished!", reply_markup=main_kb)
@@ -185,29 +201,40 @@ async def cmd_start(message: Message):
 
 async def show_songs_menu(message: Message):
     score = get_user_score(message.from_user.id)
-    kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=s["title"], callback_data=f"song:{s['id']}")] for s in SONGS] + [[InlineKeyboardButton(text="Reset Score 🔄", callback_data="reset")]])
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=s["title"], callback_data=f"song:{s['id']}")] for s in SONGS
+        ] + [[InlineKeyboardButton(text="Reset Score 🔄", callback_data="reset")]]
+    )
     await message.answer(f"Your Total Score: {score} ⭐\nChoose a song:", reply_markup=kb)
 
 async def show_fragments_menu(message: Message, song_id: str):
     song = get_song_by_id(song_id)
-    if not song: return
-    btns = [[InlineKeyboardButton(text=str(i+1), callback_data=f"sel_f:{song_id}:{i}") for i in range(j, min(j+4, len(song["fragments"])))] for j in range(0, len(song["fragments"]), 4)]
+    if not song:
+        return
+    btns = [
+        [InlineKeyboardButton(text=str(i + 1), callback_data=f"sel_f:{song_id}:{i}") for i in range(j, min(j + 4, len(song["fragments"])))]
+        for j in range(0, len(song["fragments"]), 4)
+    ]
     await message.answer(f"Choose a fragment for {song['title']}:", reply_markup=InlineKeyboardMarkup(inline_keyboard=btns))
 
 @router.callback_query(F.data.startswith("song:"))
 async def cb_song(cb: CallbackQuery):
-    await show_fragments_menu(cb.message, cb.data.split(":")[1]); await cb.answer()
+    await show_fragments_menu(cb.message, cb.data.split(":")[1])
+    await cb.answer()
 
 @router.callback_query(F.data.startswith("sel_f:"))
 async def cb_frag(cb: CallbackQuery):
     _, sid, fidx = cb.data.split(":")
     current_question[cb.from_user.id] = {"song_id": sid, "fragment_index": int(fidx)}
-    await cb.answer(); await send_fragment(cb.message, cb.from_user.id)
+    await cb.answer()
+    await send_fragment(cb.message, cb.from_user.id)
 
 @router.callback_query(F.data == "reset")
 async def cb_reset(cb: CallbackQuery):
     add_score(cb.from_user.id, -get_user_score(cb.from_user.id))
-    await cb.answer("Reset!", show_alert=True); await show_songs_menu(cb.message)
+    await cb.answer("Reset!", show_alert=True)
+    await show_songs_menu(cb.message)
 
 async def main():
     init_db()
