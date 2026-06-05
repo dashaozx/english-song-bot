@@ -20,7 +20,7 @@ from aiogram.types import (
 from aiogram.client.session.aiohttp import AiohttpSession
 
 # --- CONFIG ---
-API_TOKEN = os.getenv("BOT_TOKEN", "8562794906:AAHam-UVBOjFJxpr7WCXStTkbZ4s7JfLxqs")
+API_TOKEN = os.getenv("BOT_TOKEN")
 DB_PATH = "scores.db"
 
 logging.basicConfig(level=logging.INFO)
