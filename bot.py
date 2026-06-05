@@ -1,7 +1,9 @@
-import asyncio
+iimport asyncio
 import logging
 import os
 import sqlite3
+import random
+import subprocess
 from typing import Dict
 
 from aiogram import Bot, Dispatcher, F, Router
@@ -27,7 +29,42 @@ dp = Dispatcher()
 router = Router()
 dp.include_router(router)
 
+# Функция для автоматической нарезки круглого видео "на лету" через FFmpeg
+def cut_video_note(input_file: str, output_file: str, start_sec: int, end_sec: int):
+    duration = end_sec - start_sec
+    # Команда обрезает видео по секундам, делает его строго квадратным 1:1 и адаптирует для Telegram
+    cmd = [
+        "ffmpeg", "-y",
+        "-ss", str(start_sec),
+        "-i", input_file,
+        "-t", str(duration),
+        "-vf", "crop=in_h:in_h,scale=400:400",
+        "-c:v", "libx264", "-profile:v", "baseline", "-level", "3.0", "-pix_fmt", "yuv420p",
+        "-c:a", "aac", "-b:a", "128k",
+        output_file
+    ]
+    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
 SONGS = [
+    {
+        "id": "dragons_bones",
+        "title": "Imagine Dragons - Bones 🦴",
+        "fragments": [
+            {"file": "dragons_bones.mp4", "start": 4, "end": 8, "type": "word_order", "answer": "Gimme gimme gimme some time to think I'm in the bathroom looking at me", "translation_ru": "Дай мне немного времени подумать, я в ванной смотрю на себя."},
+            {"file": "dragons_bones.mp4", "start": 8, "end": 12, "type": "word_order", "answer": "Face in the mirror is all I need", "translation_ru": "Лицо в зеркале — это всё, что мне нужно."},
+            {"file": "dragons_bones.mp4", "start": 13, "end": 19, "type": "word_order", "answer": "Wait until the reaper takes my life Never gonna get me out alive I will live a thousand million lives", "translation_ru": "Жду, пока жнец заберет мою жизнь. Меня никогда не взять живым, я проживу тысячу миллионов жизней."},
+            {"file": "dragons_bones.mp4", "start": 20, "end": 29, "type": "word_order", "answer": "My patience is waning Is this entertaining Our patience is waning Is this entertaining", "translation_ru": "Мое терпение на исходе, разве это забавно? Наше терпение на исходе, разве это развлекает?"},
+            {"file": "dragons_bones.mp4", "start": 30, "end": 46, "type": "word_order", "answer": "Cause there's magic in my bones I got this feeling in my soul Go ahead and throw your stones", "translation_ru": "Ведь в моих костях магия, это чувство в моей душе, давайте, бросайте свои камни."},
+            {"file": "dragons_bones.mp4", "start": 46, "end": 53, "type": "word_order", "answer": "Playing with a stick of dynamite There was never gray in black and white There was never wrong til there was right", "translation_ru": "Играю с динамитной шашкой, в черно-белом никогда не было серого, не было неправильного, пока не появилось правильное."},
+            {"file": "dragons_bones.mp4", "start": 53, "end": 63, "type": "word_order", "answer": "Feeling like a boulder hurtling Seeing all the vultures circling Burning in the flames I'm working in Turning in a bed that's darkening", "translation_ru": "Чувствую себя несущимся валуном, видя, как кружат стервятники. Сгорая в пламени, в котором работаю, ворочаясь в темнеющей постели."},
+            {"file": "dragons_bones.mp4", "start": 63, "end": 71, "type": "word_order", "answer": "My patience is waning Is this entertaining Our patience is waning Is this entertaining", "translation_ru": "Мое терпение на исходе, разве это забавно? Наше терпение на исходе, разве это развлекает?"},
+            {"file": "dragons_bones.mp4", "start": 71, "end": 79, "type": "word_order", "answer": "I got this feeling yeah you know Where I'm losing all control Cause there's magic in my bones", "translation_ru": "У меня это чувство, да, ты знаешь, я теряю контроль, ведь в моих костях магия."},
+            {"file": "dragons_bones.mp4", "start": 79, "end": 88, "type": "word_order", "answer": "I got this feeling in my soul Go ahead and throw your stones Cause there's magic in my bones", "translation_ru": "Это чувство в моей душе, давайте, бросайте свои камни, ведь в моих костях магия."},
+            {"file": "dragons_bones.mp4", "start": 96, "end": 104, "type": "word_order", "answer": "Look in the mirror of my mind Turning the pages of my life Walking the path so many paced a million times", "translation_ru": "Посмотри в зеркало моего разума, переворачивая страницы моей жизни, шагая по тропе, по которой многие ходили миллионы раз."},
+            {"file": "dragons_bones.mp4", "start": 105, "end": 112, "type": "word_order", "answer": "Drown out the voices in the air Leaving the ones that never cared Picking the pieces up and building to the sky", "translation_ru": "Заглуши голоса в воздухе, оставив тех, кому было плевать, собирая осколки и строя до небес."},
+            {"file": "dragons_bones.mp4", "start": 113, "end": 122, "type": "word_order", "answer": "My patience is waning Is this entertaining My patience is waning Is this entertaining", "translation_ru": "Мое терпение на исходе, разве это интересно? Мое терпение угасает, разве это развлекает?"}
+        ]
+    },
     {
         "id": "the_beatles_yesterday",
         "title": "Yesterday - The Beatles",
@@ -90,7 +127,6 @@ SONGS = [
     }
 ]
 
-# --- KEYBOARDS ---
 main_kb = ReplyKeyboardMarkup(
     keyboard=[[KeyboardButton(text="Play")], [KeyboardButton(text="My score")]],
     resize_keyboard=True
@@ -106,7 +142,6 @@ pause_choice_kb = ReplyKeyboardMarkup(
 
 current_question: Dict[int, Dict[str, object]] = {}
 
-# --- DB LOGIC ---
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
@@ -139,7 +174,22 @@ def add_score(user_id: int, points: int) -> int:
 def get_song_by_id(song_id: str) -> dict | None:
     return next((s for s in SONGS if s["id"] == song_id), None)
 
-# --- ИСПРАВЛЕННАЯ ФУНКЦИЯ ---
+# Клавиатура выводит по 2 слова в ряд, чтобы они не сжимались на экране телефона
+def get_words_keyboard(words: list, selected_indices: list) -> InlineKeyboardMarkup:
+    buttons = []
+    row = []
+    for idx, word in enumerate(words):
+        if idx in selected_indices:
+            continue  
+        row.append(InlineKeyboardButton(text=word, callback_data=f"word:{idx}"))
+        if len(row) == 2:  
+            buttons.append(row)
+            row = []
+    if row:
+        buttons.append(row)
+    buttons.append([InlineKeyboardButton(text="Reset Selection 🔄", callback_data="word_reset")])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
 async def send_fragment(message: Message, user_id: int):
     data = current_question.get(user_id)
     if not data:
@@ -149,13 +199,110 @@ async def send_fragment(message: Message, user_id: int):
     idx = data["fragment_index"]
     fragment = song["fragments"][idx]
 
-    file_path = os.path.join("audio", fragment["file"])
-    if os.path.exists(file_path):
-        await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(file_path))
-    else:
-        await message.answer(f"⚠️ Файл {fragment['file']} не найден в папке audio")
+    input_path = os.path.join("audio", fragment["file"])
+    if not os.path.exists(input_path):
+        return await message.answer(f"⚠️ Базовый файл {fragment['file']} не найден в папке audio")
 
-    await message.answer(fragment["text"])
+    # Автонарезка фрагментов по таймингам
+    if "start" in fragment and "end" in fragment:
+        output_filename = f"cut_{data['song_id']}_{idx}.mp4"
+        output_path = os.path.join("audio", output_filename)
+        
+        if not os.path.exists(output_path):
+            await message.answer("🔄 Подготавливаю видео-кружочек...")
+            cut_video_note(input_path, output_path, fragment["start"], fragment["end"])
+        
+        target_file = output_path
+    else:
+        target_file = input_path
+
+    if os.path.exists(target_file):
+        await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(target_file))
+    else:
+        await message.answer("⚠️ Ошибка обработки видео.")
+        return
+
+    if fragment.get("type") == "word_order":
+        # Убираем знаки препинания для удобства сборки
+        clean_text = fragment["answer"].replace(",", "").replace(".", "").replace("(", "").replace(")", "")
+        words = clean_text.split()
+        
+        indices = list(range(len(words)))
+        random.seed(user_id + idx) 
+        random.shuffle(indices)
+        
+        data["words_list"] = words
+        data["shuffled_indices"] = indices
+        data["selected_indices"] = []
+        data["current_assembled"] = ""
+
+        kb = get_words_keyboard([words[i] for i in indices], data["selected_indices"])
+        await message.answer("🧩 Собери строчку! Нажимай на слова по порядку:\n\n**Твоя фраза:** (пока пусто)", reply_markup=kb, parse_mode="Markdown")
+    else:
+        await message.answer(fragment["text"])
+
+@router.callback_query(F.data.startswith("word:"))
+async def cb_word_click(cb: CallbackQuery):
+    user_id = cb.from_user.id
+    if user_id not in current_question:
+        return await cb.answer()
+
+    data = current_question[user_id]
+    clicked_idx = int(cb.data.split(":")[1])
+    
+    if clicked_idx in data["selected_indices"]:
+        return await cb.answer()
+
+    data["selected_indices"].append(clicked_idx)
+    current_words = [data["words_list"][data["shuffled_indices"][i]] for i in data["selected_indices"]]
+    data["current_assembled"] = " ".join(current_words)
+    
+    song = get_song_by_id(data["song_id"])
+    fragment = song["fragments"][data["fragment_index"]]
+    
+    if len(data["selected_indices"]) == len(data["words_list"]):
+        score = add_score(user_id, 10)
+        trans = fragment.get("translation_ru", "")
+        
+        await cb.message.edit_text(f"✅ **Отлично сработано!**\n\n📝 Строчка: *{fragment['answer']}*\n\nТвой счет: {score} ⭐\nПеревод: {trans}", parse_mode="Markdown")
+        
+        if data["fragment_index"] >= len(song["fragments"]) - 1:
+            del current_question[user_id]
+            await cb.message.answer("🔥 **Песня полностью разобрана! Превосходный результат!**", reply_markup=main_kb)
+            await show_songs_menu(cb.message)
+        else:
+            data["awaiting_next"] = True
+            await cb.message.answer("Переходим к следующему фрагменту?", reply_markup=next_fragment_kb)
+        await cb.answer()
+        return
+
+    display_text = f"🧩 Собери строчку! Нажимай на слова по порядку:\n\n**Твоя фраза:** {data['current_assembled']}"
+    kb = get_words_keyboard([data["words_list"][i] for i in data["shuffled_indices"]], data["selected_indices"])
+    
+    try:
+        await cb.message.edit_text(display_text, reply_markup=kb, parse_mode="Markdown")
+    except Exception:
+        pass
+    await cb.answer()
+
+@router.callback_query(F.data == "word_reset")
+async def cb_word_reset(cb: CallbackQuery):
+    user_id = cb.from_user.id
+    if user_id not in current_question:
+        return await cb.answer()
+    
+    data = current_question[user_id]
+    data["selected_indices"] = []
+    data["current_assembled"] = ""
+    
+    display_text = f"🧩 Собери строчку! Нажимай на слова по порядку:\n\n**Твоя фраза:** (пока пусто)"
+    kb = get_words_keyboard([data["words_list"][i] for i in data["shuffled_indices"]], data["selected_indices"])
+    
+    try:
+        await cb.message.edit_text(display_text, reply_markup=kb, parse_mode="Markdown")
+    except Exception:
+        pass
+    await cb.answer("Выбор сброшен 🔄")
 
 async def check_answer(message: Message):
     user_id = message.from_user.id
@@ -164,6 +311,9 @@ async def check_answer(message: Message):
     data = current_question[user_id]
     song = get_song_by_id(data["song_id"])
     fragment = song["fragments"][data["fragment_index"]]
+
+    if fragment.get("type") == "word_order":
+        return
 
     if message.text.lower().strip() == fragment["answer"].lower().strip():
         score = add_score(user_id, 10)
@@ -239,14 +389,20 @@ async def cb_reset(cb: CallbackQuery):
 async def main():
     init_db()
     bot = Bot(token=API_TOKEN, session=AiohttpSession())
-    dp.message.register(cmd_start, CommandStart())
-    dp.message.register(next_fragment, F.text == "Next")
-    dp.message.register(continue_song, F.text == "Continue this song")
-    dp.message.register(show_songs_menu, F.text.casefold() == "play")
-    dp.message.register(lambda m: m.answer(f"Score: {get_user_score(m.from_user.id)} ⭐"), F.text == "My score")
-    dp.message.register(check_answer, F.text)
+    
+    # Сначала регистрируем четкие команды и системные кнопки
+    router.message.register(cmd_start, CommandStart())
+    router.message.register(next_fragment, F.text == "Next")
+    router.message.register(continue_song, F.text == "Continue this song")
+    router.message.register(show_songs_menu, F.text.casefold() == "play")
+    router.message.register(lambda m: m.answer(f"Score: {get_user_score(m.from_user.id)} ⭐"), F.text == "My score")
+    
+    # САМЫЙ ПОСЛЕДНИЙ ХЕНДЛЕР ДЛЯ ТЕКСТА — ловит ответы студентов на обычные загадки
+    router.message.register(check_answer, F.text)
+    
+    # Регистрируем инлайн-кнопки (для сборки слов)
+    router.callback_query.register(cb_word_click, F.data.startswith("word:"))
+    router.callback_query.register(cb_word_reset, F.data == "word_reset")
+    
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
-
-if __name__ == "__main__":
-    asyncio.run(main())
