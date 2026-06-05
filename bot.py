@@ -404,5 +404,10 @@ async def main():
     router.callback_query.register(cb_word_click, F.data.startswith("word:"))
     router.callback_query.register(cb_word_reset, F.data == "word_reset")
     
+    # Эти две строчки должны быть внутри функции main(), то есть с четырьмя пробелами:
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
+
+# А ЭТИ ДВЕ СТРОЧКИ ДОЛЖНЫ БЫТЬ ПРИЖАТЫ СТРОГО К ЛЕВОМУ КРАЮ (БЕЗ ПРОБЕЛОВ):
+if __name__ == "__main__":
+    asyncio.run(main())
