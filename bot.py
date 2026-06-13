@@ -22,6 +22,7 @@ from aiogram.client.session.aiohttp import AiohttpSession
 # --- CONFIG ---
 API_TOKEN = os.getenv("BOT_TOKEN")
 DB_PATH = "scores.db"
+MAX_WORDS_PER_CHUNK = 6
 
 logging.basicConfig(level=logging.INFO)
 
@@ -226,18 +227,30 @@ async def send_fragment(message: Message, user_id: int):
         # Убираем знаки препинания для удобства сборки
         clean_text = fragment["answer"].replace(",", "").replace(".", "").replace("(", "").replace(")", "")
         words = clean_text.split()
-        
-        indices = list(range(len(words)))
-        random.seed(user_id + idx) 
+        chunks = [words[i:i + MAX_WORDS_PER_CHUNK] for i in range(0, len(words), MAX_WORDS_PER_CHUNK)]
+
+        data["word_chunks"] = chunks
+        data["chunk_index"] = 0
+        data["assembled_full"] = ""
+
+        first_chunk = chunks[0]
+        indices = list(range(len(first_chunk)))
+        random.seed(user_id + idx + data["chunk_index"])
         random.shuffle(indices)
-        
-        data["words_list"] = words
+
+        data["words_list"] = first_chunk
         data["shuffled_indices"] = indices
         data["selected_indices"] = []
         data["current_assembled"] = ""
 
-        kb = get_words_keyboard([words[i] for i in indices], data["selected_indices"])
-        await message.answer("🧩 Собери строчку! Нажимай на слова по порядку:\n\n**Твоя фраза:** (пока пусто)", reply_markup=kb, parse_mode="Markdown")
+        kb = get_words_keyboard([first_chunk[i] for i in indices], data["selected_indices"])
+        num_chunks = len(chunks)
+        part_label = f" (часть 1 из {num_chunks})" if num_chunks > 1 else ""
+        await message.answer(
+            f"🧩 Собери строчку!{part_label} Нажимай на слова по порядку:\n\n**Твоя фраза:** (пока пусто)",
+            reply_markup=kb,
+            parse_mode="Markdown",
+        )
     else:
         await message.answer(fragment["text"])
 
@@ -261,11 +274,55 @@ async def cb_word_click(cb: CallbackQuery):
     fragment = song["fragments"][data["fragment_index"]]
     
     if len(data["selected_indices"]) == len(data["words_list"]):
+        chunk_text = data["current_assembled"]
+        if data["assembled_full"]:
+            data["assembled_full"] += " " + chunk_text
+        else:
+            data["assembled_full"] = chunk_text
+
+        if data["chunk_index"] + 1 < len(data["word_chunks"]):
+            score = add_score(user_id, 10)
+
+            data["chunk_index"] += 1
+            next_chunk = data["word_chunks"][data["chunk_index"]]
+            indices = list(range(len(next_chunk)))
+            random.seed(user_id + data["fragment_index"] + data["chunk_index"])
+            random.shuffle(indices)
+
+            data["words_list"] = next_chunk
+            data["shuffled_indices"] = indices
+            data["selected_indices"] = []
+            data["current_assembled"] = ""
+
+            await cb.message.edit_text(
+                f"✅ Часть собрана: {chunk_text}\n\nТвой счет: {score} ⭐",
+                parse_mode="Markdown",
+            )
+
+            num_chunks = len(data["word_chunks"])
+            part_num = data["chunk_index"] + 1
+            part_label = f" (часть {part_num} из {num_chunks})"
+            kb = get_words_keyboard(
+                [next_chunk[i] for i in indices],
+                data["selected_indices"],
+            )
+            await cb.message.answer(
+                f"🧩 Собери строчку!{part_label} Нажимай на слова по порядку:\n\n**Твоя фраза:** (пока пусто)",
+                reply_markup=kb,
+                parse_mode="Markdown",
+            )
+            await cb.answer()
+            return
+
         score = add_score(user_id, 10)
         trans = fragment.get("translation_ru", "")
-        
-        await cb.message.edit_text(f"✅ **Отлично сработано!**\n\n📝 Строчка: *{fragment['answer']}*\n\nТвой счет: {score} ⭐\nПеревод: {trans}", parse_mode="Markdown")
-        
+
+        await cb.message.edit_text(
+            f"✅ **Отлично сработано!**\n\n📝 Строчка: *{data['assembled_full']}*\n\n"
+            f"Твой счет: {score} ⭐\nПеревод: {trans}",
+            parse_mode="Markdown",
+        )
+
         if data["fragment_index"] >= len(song["fragments"]) - 1:
             del current_question[user_id]
             await cb.message.answer("🔥 **Песня полностью разобрана! Превосходный результат!**", reply_markup=main_kb)
