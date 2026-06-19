@@ -275,6 +275,34 @@ async def cb_word_click(cb: CallbackQuery):
     
     if len(data["selected_indices"]) == len(data["words_list"]):
         chunk_text = data["current_assembled"]
+        correct_chunk = " ".join(data["word_chunks"][data["chunk_index"]])
+
+        if chunk_text != correct_chunk:
+            data["selected_indices"] = []
+            data["current_assembled"] = ""
+
+            num_chunks = len(data["word_chunks"])
+            part_label = (
+                f" (часть {data['chunk_index'] + 1} из {num_chunks})"
+                if num_chunks > 1
+                else ""
+            )
+            kb = get_words_keyboard(
+                [data["words_list"][i] for i in data["shuffled_indices"]],
+                data["selected_indices"],
+            )
+            display_text = (
+                f"❌ Неверный порядок, попробуй ещё раз\n\n"
+                f"🧩 Собери строчку!{part_label} Нажимай на слова по порядку:\n\n"
+                f"**Твоя фраза:** (пока пусто)"
+            )
+            try:
+                await cb.message.edit_text(display_text, reply_markup=kb, parse_mode="Markdown")
+            except Exception:
+                pass
+            await cb.answer()
+            return
+
         if data["assembled_full"]:
             data["assembled_full"] += " " + chunk_text
         else:
