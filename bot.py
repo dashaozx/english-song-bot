@@ -22,8 +22,6 @@ from aiogram.client.session.aiohttp import AiohttpSession
 # --- CONFIG ---
 API_TOKEN = os.getenv("BOT_TOKEN")
 DB_PATH = "scores.db"
-MAX_WORDS_PER_CHUNK = 6
-
 logging.basicConfig(level=logging.INFO)
 
 dp = Dispatcher()
@@ -51,19 +49,19 @@ SONGS = [
         "id": "dragons_bones",
         "title": "Imagine Dragons - Bones 🦴",
         "fragments": [
-            {"file": "dragons_bones.mp4", "start": 4, "end": 8, "type": "word_order", "answer": "Gimme gimme gimme some time to think I'm in the bathroom looking at me", "translation_ru": "Дай мне немного времени подумать, я в ванной смотрю на себя."},
-            {"file": "dragons_bones.mp4", "start": 8, "end": 12, "type": "word_order", "answer": "Face in the mirror is all I need", "translation_ru": "Лицо в зеркале — это всё, что мне нужно."},
-            {"file": "dragons_bones.mp4", "start": 13, "end": 19, "type": "word_order", "answer": "Wait until the reaper takes my life Never gonna get me out alive I will live a thousand million lives", "translation_ru": "Жду, пока жнец заберет мою жизнь. Меня никогда не взять живым, я проживу тысячу миллионов жизней."},
-            {"file": "dragons_bones.mp4", "start": 20, "end": 29, "type": "word_order", "answer": "My patience is waning Is this entertaining Our patience is waning Is this entertaining", "translation_ru": "Мое терпение на исходе, разве это забавно? Наше терпение на исходе, разве это развлекает?"},
-            {"file": "dragons_bones.mp4", "start": 30, "end": 46, "type": "word_order", "answer": "Cause there's magic in my bones I got this feeling in my soul Go ahead and throw your stones", "translation_ru": "Ведь в моих костях магия, это чувство в моей душе, давайте, бросайте свои камни."},
-            {"file": "dragons_bones.mp4", "start": 46, "end": 53, "type": "word_order", "answer": "Playing with a stick of dynamite There was never gray in black and white There was never wrong til there was right", "translation_ru": "Играю с динамитной шашкой, в черно-белом никогда не было серого, не было неправильного, пока не появилось правильное."},
-            {"file": "dragons_bones.mp4", "start": 53, "end": 63, "type": "word_order", "answer": "Feeling like a boulder hurtling Seeing all the vultures circling Burning in the flames I'm working in Turning in a bed that's darkening", "translation_ru": "Чувствую себя несущимся валуном, видя, как кружат стервятники. Сгорая в пламени, в котором работаю, ворочаясь в темнеющей постели."},
-            {"file": "dragons_bones.mp4", "start": 63, "end": 71, "type": "word_order", "answer": "My patience is waning Is this entertaining Our patience is waning Is this entertaining", "translation_ru": "Мое терпение на исходе, разве это забавно? Наше терпение на исходе, разве это развлекает?"},
-            {"file": "dragons_bones.mp4", "start": 71, "end": 79, "type": "word_order", "answer": "I got this feeling yeah you know Where I'm losing all control Cause there's magic in my bones", "translation_ru": "У меня это чувство, да, ты знаешь, я теряю контроль, ведь в моих костях магия."},
-            {"file": "dragons_bones.mp4", "start": 79, "end": 88, "type": "word_order", "answer": "I got this feeling in my soul Go ahead and throw your stones Cause there's magic in my bones", "translation_ru": "Это чувство в моей душе, давайте, бросайте свои камни, ведь в моих костях магия."},
-            {"file": "dragons_bones.mp4", "start": 96, "end": 104, "type": "word_order", "answer": "Look in the mirror of my mind Turning the pages of my life Walking the path so many paced a million times", "translation_ru": "Посмотри в зеркало моего разума, переворачивая страницы моей жизни, шагая по тропе, по которой многие ходили миллионы раз."},
-            {"file": "dragons_bones.mp4", "start": 105, "end": 112, "type": "word_order", "answer": "Drown out the voices in the air Leaving the ones that never cared Picking the pieces up and building to the sky", "translation_ru": "Заглуши голоса в воздухе, оставив тех, кому было плевать, собирая осколки и строя до небес."},
-            {"file": "dragons_bones.mp4", "start": 113, "end": 122, "type": "word_order", "answer": "My patience is waning Is this entertaining My patience is waning Is this entertaining", "translation_ru": "Мое терпение на исходе, разве это интересно? Мое терпение угасает, разве это развлекает?"}
+            {"file": "dragons_bones.mp4", "start": 4, "end": 8, "type": "word_order", "text": "Gimme gimme gimme some time to think\nI'm in the bathroom looking at me", "translation_ru": "Дай мне немного времени подумать, я в ванной смотрю на себя."},
+            {"file": "dragons_bones.mp4", "start": 8, "end": 12, "type": "word_order", "text": "Face in the mirror is all I need", "translation_ru": "Лицо в зеркале — это всё, что мне нужно."},
+            {"file": "dragons_bones.mp4", "start": 13, "end": 19, "type": "word_order", "text": "Wait until the reaper takes my life\nNever gonna get me out alive\nI will live a thousand million lives", "translation_ru": "Жду, пока жнец заберет мою жизнь. Меня никогда не взять живым, я проживу тысячу миллионов жизней."},
+            {"file": "dragons_bones.mp4", "start": 20, "end": 29, "type": "word_order", "text": "My patience is waning\nIs this entertaining\nOur patience is waning\nIs this entertaining", "translation_ru": "Мое терпение на исходе, разве это забавно? Наше терпение на исходе, разве это развлекает?"},
+            {"file": "dragons_bones.mp4", "start": 30, "end": 46, "type": "word_order", "text": "Cause there's magic in my bones\nI got this feeling in my soul\nGo ahead and throw your stones", "translation_ru": "Ведь в моих костях магия, это чувство в моей душе, давайте, бросайте свои камни."},
+            {"file": "dragons_bones.mp4", "start": 46, "end": 53, "type": "word_order", "text": "Playing with a stick of dynamite\nThere was never gray in black and white\nThere was never wrong til there was right", "translation_ru": "Играю с динамитной шашкой, в черно-белом никогда не было серого, не было неправильного, пока не появилось правильное."},
+            {"file": "dragons_bones.mp4", "start": 53, "end": 63, "type": "word_order", "text": "Feeling like a boulder hurtling\nSeeing all the vultures circling\nBurning in the flames I'm working in\nTurning in a bed that's darkening", "translation_ru": "Чувствую себя несущимся валуном, видя, как кружат стервятники. Сгорая в пламени, в котором работаю, ворочаясь в темнеющей постели."},
+            {"file": "dragons_bones.mp4", "start": 63, "end": 71, "type": "word_order", "text": "My patience is waning\nIs this entertaining\nOur patience is waning\nIs this entertaining", "translation_ru": "Мое терпение на исходе, разве это забавно? Наше терпение на исходе, разве это развлекает?"},
+            {"file": "dragons_bones.mp4", "start": 71, "end": 79, "type": "word_order", "text": "I got this feeling yeah you know\nWhere I'm losing all control\nCause there's magic in my bones", "translation_ru": "У меня это чувство, да, ты знаешь, я теряю контроль, ведь в моих костях магия."},
+            {"file": "dragons_bones.mp4", "start": 79, "end": 88, "type": "word_order", "text": "I got this feeling in my soul\nGo ahead and throw your stones\nCause there's magic in my bones", "translation_ru": "Это чувство в моей душе, давайте, бросайте свои камни, ведь в моих костях магия."},
+            {"file": "dragons_bones.mp4", "start": 96, "end": 104, "type": "word_order", "text": "Look in the mirror of my mind\nTurning the pages of my life\nWalking the path so many paced a million times", "translation_ru": "Посмотри в зеркало моего разума, переворачивая страницы моей жизни, шагая по тропе, по которой многие ходили миллионы раз."},
+            {"file": "dragons_bones.mp4", "start": 105, "end": 112, "type": "word_order", "text": "Drown out the voices in the air\nLeaving the ones that never cared\nPicking the pieces up and building to the sky", "translation_ru": "Заглуши голоса в воздухе, оставив тех, кому было плевать, собирая осколки и строя до небес."},
+            {"file": "dragons_bones.mp4", "start": 113, "end": 122, "type": "word_order", "text": "My patience is waning\nIs this entertaining\nMy patience is waning\nIs this entertaining", "translation_ru": "Мое терпение на исходе, разве это интересно? Мое терпение угасает, разве это развлекает?"}
         ]
     },
     {
@@ -224,30 +222,30 @@ async def send_fragment(message: Message, user_id: int):
         return
 
     if fragment.get("type") == "word_order":
-        # Убираем знаки препинания для удобства сборки
-        clean_text = fragment["answer"].replace(",", "").replace(".", "").replace("(", "").replace(")", "")
+        full_text = fragment["text"]
+        lines = [line.strip() for line in full_text.split("\n") if line.strip()]
+        target_line = random.choice(lines)
+
+        clean_text = target_line.replace(",", "").replace(".", "").replace("(", "").replace(")", "")
         words = clean_text.split()
-        chunks = [words[i:i + MAX_WORDS_PER_CHUNK] for i in range(0, len(words), MAX_WORDS_PER_CHUNK)]
 
-        data["word_chunks"] = chunks
-        data["chunk_index"] = 0
-        data["assembled_full"] = ""
-
-        first_chunk = chunks[0]
-        indices = list(range(len(first_chunk)))
-        random.seed(user_id + idx + data["chunk_index"])
+        indices = list(range(len(words)))
+        random.seed(user_id + idx)
         random.shuffle(indices)
 
-        data["words_list"] = first_chunk
+        data["target_line"] = target_line
+        data["words_list"] = words
         data["shuffled_indices"] = indices
         data["selected_indices"] = []
         data["current_assembled"] = ""
+        data["word_order_header"] = (
+            f"{full_text}\n\n🔤 Собери строку: **{target_line}**\n\n"
+            f"🧩 Собери строчку! Нажимай на слова по порядку:"
+        )
 
-        kb = get_words_keyboard([first_chunk[i] for i in indices], data["selected_indices"])
-        num_chunks = len(chunks)
-        part_label = f" (часть 1 из {num_chunks})" if num_chunks > 1 else ""
+        kb = get_words_keyboard([words[i] for i in indices], data["selected_indices"])
         await message.answer(
-            f"🧩 Собери строчку!{part_label} Нажимай на слова по порядку:\n\n**Твоя фраза:** (пока пусто)",
+            f"{data['word_order_header']}\n\n**Твоя фраза:** (пока пусто)",
             reply_markup=kb,
             parse_mode="Markdown",
         )
@@ -274,26 +272,27 @@ async def cb_word_click(cb: CallbackQuery):
     fragment = song["fragments"][data["fragment_index"]]
     
     if len(data["selected_indices"]) == len(data["words_list"]):
-        chunk_text = data["current_assembled"]
-        correct_chunk = " ".join(data["word_chunks"][data["chunk_index"]])
+        assembled = data["current_assembled"]
+        clean_target = (
+            data["target_line"]
+            .replace(",", "")
+            .replace(".", "")
+            .replace("(", "")
+            .replace(")", "")
+        )
+        correct = " ".join(clean_target.split())
 
-        if chunk_text != correct_chunk:
+        if assembled != correct:
             data["selected_indices"] = []
             data["current_assembled"] = ""
 
-            num_chunks = len(data["word_chunks"])
-            part_label = (
-                f" (часть {data['chunk_index'] + 1} из {num_chunks})"
-                if num_chunks > 1
-                else ""
-            )
             kb = get_words_keyboard(
                 [data["words_list"][i] for i in data["shuffled_indices"]],
                 data["selected_indices"],
             )
             display_text = (
                 f"❌ Неверный порядок, попробуй ещё раз\n\n"
-                f"🧩 Собери строчку!{part_label} Нажимай на слова по порядку:\n\n"
+                f"{data['word_order_header']}\n\n"
                 f"**Твоя фраза:** (пока пусто)"
             )
             try:
@@ -303,50 +302,11 @@ async def cb_word_click(cb: CallbackQuery):
             await cb.answer()
             return
 
-        if data["assembled_full"]:
-            data["assembled_full"] += " " + chunk_text
-        else:
-            data["assembled_full"] = chunk_text
-
-        if data["chunk_index"] + 1 < len(data["word_chunks"]):
-            score = add_score(user_id, 10)
-
-            data["chunk_index"] += 1
-            next_chunk = data["word_chunks"][data["chunk_index"]]
-            indices = list(range(len(next_chunk)))
-            random.seed(user_id + data["fragment_index"] + data["chunk_index"])
-            random.shuffle(indices)
-
-            data["words_list"] = next_chunk
-            data["shuffled_indices"] = indices
-            data["selected_indices"] = []
-            data["current_assembled"] = ""
-
-            await cb.message.edit_text(
-                f"✅ Часть собрана: {chunk_text}\n\nТвой счет: {score} ⭐",
-                parse_mode="Markdown",
-            )
-
-            num_chunks = len(data["word_chunks"])
-            part_num = data["chunk_index"] + 1
-            part_label = f" (часть {part_num} из {num_chunks})"
-            kb = get_words_keyboard(
-                [next_chunk[i] for i in indices],
-                data["selected_indices"],
-            )
-            await cb.message.answer(
-                f"🧩 Собери строчку!{part_label} Нажимай на слова по порядку:\n\n**Твоя фраза:** (пока пусто)",
-                reply_markup=kb,
-                parse_mode="Markdown",
-            )
-            await cb.answer()
-            return
-
         score = add_score(user_id, 10)
         trans = fragment.get("translation_ru", "")
 
         await cb.message.edit_text(
-            f"✅ **Отлично сработано!**\n\n📝 Строчка: *{data['assembled_full']}*\n\n"
+            f"✅ **Отлично сработано!**\n\n📝 Строчка: *{data['target_line']}*\n\n"
             f"Твой счет: {score} ⭐\nПеревод: {trans}",
             parse_mode="Markdown",
         )
@@ -361,7 +321,7 @@ async def cb_word_click(cb: CallbackQuery):
         await cb.answer()
         return
 
-    display_text = f"🧩 Собери строчку! Нажимай на слова по порядку:\n\n**Твоя фраза:** {data['current_assembled']}"
+    display_text = f"{data['word_order_header']}\n\n**Твоя фраза:** {data['current_assembled']}"
     kb = get_words_keyboard([data["words_list"][i] for i in data["shuffled_indices"]], data["selected_indices"])
     
     try:
@@ -380,7 +340,7 @@ async def cb_word_reset(cb: CallbackQuery):
     data["selected_indices"] = []
     data["current_assembled"] = ""
     
-    display_text = f"🧩 Собери строчку! Нажимай на слова по порядку:\n\n**Твоя фраза:** (пока пусто)"
+    display_text = f"{data['word_order_header']}\n\n**Твоя фраза:** (пока пусто)"
     kb = get_words_keyboard([data["words_list"][i] for i in data["shuffled_indices"]], data["selected_indices"])
     
     try:
