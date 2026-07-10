@@ -236,13 +236,12 @@ async def send_fragment(message: Message, user_id: int):
         random.seed(user_id + idx)
         random.shuffle(indices)
 
+        data["target_line"] = target_line
         data["words_list"] = words
         data["shuffled_indices"] = indices
         data["selected_indices"] = []
         data["current_assembled"] = ""
-        data["word_order_header"] = (
-            f"{full_text}\n\n🧩 Собери строчку! Нажимай на слова по порядку:"
-        )
+        data["word_order_header"] = "🧩 **Послушай кружочек и собери строчку!** Нажимай на слова по порядку:"
 
         kb = get_words_keyboard([words[i] for i in indices], data["selected_indices"])
         await message.answer(
