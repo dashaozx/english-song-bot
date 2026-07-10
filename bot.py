@@ -14,8 +14,8 @@ from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     KeyboardButton,
-    Message,
     ReplyKeyboardMarkup,
+    Message,
 )
 from aiogram.client.session.aiohttp import AiohttpSession
 
@@ -31,7 +31,6 @@ dp.include_router(router)
 # Функция для автоматической нарезки круглого видео "на лету" через FFmpeg
 def cut_video_note(input_file: str, output_file: str, start_sec: int, end_sec: int):
     duration = end_sec - start_sec
-    # Команда обрезает видео по секундам, делает его строго квадратным 1:1 и адаптирует для Telegram
     cmd = [
         "ffmpeg", "-y",
         "-ss", str(start_sec),
@@ -173,7 +172,6 @@ def add_score(user_id: int, points: int) -> int:
 def get_song_by_id(song_id: str) -> dict | None:
     return next((s for s in SONGS if s["id"] == song_id), None)
 
-# Клавиатура выводит по 2 слова в ряд, чтобы они не сжимались на экране телефона
 def get_words_keyboard(words: list, selected_indices: list) -> InlineKeyboardMarkup:
     buttons = []
     row = []
@@ -202,7 +200,6 @@ async def send_fragment(message: Message, user_id: int):
     if not os.path.exists(input_path):
         return await message.answer(f"⚠️ Базовый файл {fragment['file']} не найден в папке audio")
 
-    # Автонарезка фрагментов по таймингам
     if "start" in fragment and "end" in fragment:
         output_filename = f"cut_{data['song_id']}_{idx}.mp4"
         output_path = os.path.join("audio", output_filename)
@@ -224,7 +221,13 @@ async def send_fragment(message: Message, user_id: int):
     if fragment.get("type") == "word_order":
         full_text = fragment["text"]
         lines = [line.strip() for line in full_text.split("\n") if line.strip()]
-        target_line = random.choice(lines)
+        
+        # Защита от повторного перемешивания при Reset: берем уже сохраненную строку или выбираем новую
+        if "target_line" not in data:
+            target_line = random.choice(lines)
+            data["target_line"] = target_line
+        else:
+            target_line = data["target_line"]
 
         clean_text = target_line.replace(",", "").replace(".", "").replace("(", "").replace(")", "")
         words = clean_text.split()
@@ -233,14 +236,12 @@ async def send_fragment(message: Message, user_id: int):
         random.seed(user_id + idx)
         random.shuffle(indices)
 
-        data["target_line"] = target_line
         data["words_list"] = words
         data["shuffled_indices"] = indices
         data["selected_indices"] = []
         data["current_assembled"] = ""
         data["word_order_header"] = (
-            f"{full_text}\n\n🔤 Собери строку: **{target_line}**\n\n"
-            f"🧩 Собери строчку! Нажимай на слова по порядку:"
+            f"{full_text}\n\n🧩 Собери строчку! Нажимай на слова по порядку:"
         )
 
         kb = get_words_keyboard([words[i] for i in indices], data["selected_indices"])
@@ -282,7 +283,7 @@ async def cb_word_click(cb: CallbackQuery):
         )
         correct = " ".join(clean_target.split())
 
-        if assembled != correct:
+        if assembled.lower().strip() != correct.lower().strip():
             data["selected_indices"] = []
             data["current_assembled"] = ""
 
@@ -310,6 +311,10 @@ async def cb_word_click(cb: CallbackQuery):
             f"Твой счет: {score} ⭐\nПеревод: {trans}",
             parse_mode="Markdown",
         )
+
+        # Очищаем сохраненную строку для следующего раунда
+        if "target_line" in data:
+            del data["target_line"]
 
         if data["fragment_index"] >= len(song["fragments"]) - 1:
             del current_question[user_id]
@@ -353,10 +358,12 @@ async def check_answer(message: Message):
     user_id = message.from_user.id
     if user_id not in current_question or any(current_question[user_id].get(k) for k in ["awaiting_next", "awaiting_continue"]):
         return
+    
     data = current_question[user_id]
     song = get_song_by_id(data["song_id"])
     fragment = song["fragments"][data["fragment_index"]]
 
+    # ЗАЩИТА: Если это режим сборки слов, текстовые сообщения тут обрабатывать не нужно!
     if fragment.get("type") == "word_order":
         return
 
@@ -435,24 +442,20 @@ async def main():
     init_db()
     bot = Bot(token=API_TOKEN, session=AiohttpSession())
     
-    # Сначала регистрируем четкие команды и системные кнопки
     router.message.register(cmd_start, CommandStart())
     router.message.register(next_fragment, F.text == "Next")
     router.message.register(continue_song, F.text == "Continue this song")
     router.message.register(show_songs_menu, F.text.casefold() == "play")
     router.message.register(lambda m: m.answer(f"Score: {get_user_score(m.from_user.id)} ⭐"), F.text == "My score")
     
-    # САМЫЙ ПОСЛЕДНИЙ ХЕНДЛЕР ДЛЯ ТЕКСТА — ловит ответы студентов на обычные загадки
+    # САМЫЙ ПОСЛЕДНИЙ ХЕНДЛЕР ДЛЯ ТЕКСТА
     router.message.register(check_answer, F.text)
     
-    # Регистрируем инлайн-кнопки (для сборки слов)
     router.callback_query.register(cb_word_click, F.data.startswith("word:"))
     router.callback_query.register(cb_word_reset, F.data == "word_reset")
     
-    # Эти две строчки должны быть внутри функции main(), то есть с четырьмя пробелами:
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
-# А ЭТИ ДВЕ СТРОЧКИ ДОЛЖНЫ БЫТЬ ПРИЖАТЫ СТРОГО К ЛЕВОМУ КРАЮ (БЕЗ ПРОБЕЛОВ):
 if __name__ == "__main__":
     asyncio.run(main())
