@@ -190,7 +190,7 @@ def get_words_keyboard(words: list, selected_indices: list) -> InlineKeyboardMar
 async def send_fragment(message: Message, user_id: int):
     data = current_question.get(user_id)
     if not data:
-        return await show_songs_menu(message)
+        return await show_songs_menu(message, user_id)
 
     song = get_song_by_id(data["song_id"])
     idx = data["fragment_index"]
@@ -318,7 +318,9 @@ async def cb_word_click(cb: CallbackQuery):
         if data["fragment_index"] >= len(song["fragments"]) - 1:
             del current_question[user_id]
             await cb.message.answer("🔥 **Песня полностью разобрана! Превосходный результат!**", reply_markup=main_kb)
-            await show_songs_menu(cb.message)
+            # ИСПРАВЛЕНО: раньше сюда передавался cb.message, из-за чего
+            # get_user_score() считал очки бота, а не игрока, и счёт показывался как 0.
+            await show_songs_menu(cb.message, user_id)
         else:
             data["awaiting_next"] = True
             await cb.message.answer("Переходим к следующему фрагменту?", reply_markup=next_fragment_kb)
@@ -373,7 +375,7 @@ async def check_answer(message: Message):
         if data["fragment_index"] >= len(song["fragments"]) - 1:
             del current_question[user_id]
             await message.answer(f"✅ Correct! (Total: {score} ⭐)\n\nTranslation: {trans}\n\n🔥 Song Finished!", reply_markup=main_kb)
-            return await show_songs_menu(message)
+            return await show_songs_menu(message, user_id)
 
         if data["song_id"] == "the_beatles_yesterday" and data["fragment_index"] == 4:
             data["awaiting_continue"] = True
@@ -398,10 +400,15 @@ async def continue_song(message: Message):
 
 async def cmd_start(message: Message):
     await message.answer("Welcome!", reply_markup=main_kb)
-    await show_songs_menu(message)
+    await show_songs_menu(message, message.from_user.id)
 
-async def show_songs_menu(message: Message):
-    score = get_user_score(message.from_user.id)
+async def show_songs_menu(message: Message, user_id: int | None = None):
+    # ИСПРАВЛЕНО: раньше здесь всегда бралось message.from_user.id,
+    # а если message приходил из callback-контекста бота (cb.message),
+    # это был ID бота, а не игрока — из-за чего счёт всегда показывался как 0.
+    # Теперь ID пользователя можно передать явно.
+    uid = user_id if user_id is not None else message.from_user.id
+    score = get_user_score(uid)
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text=s["title"], callback_data=f"song:{s['id']}")] for s in SONGS
@@ -435,24 +442,30 @@ async def cb_frag(cb: CallbackQuery):
 async def cb_reset(cb: CallbackQuery):
     add_score(cb.from_user.id, -get_user_score(cb.from_user.id))
     await cb.answer("Reset!", show_alert=True)
-    await show_songs_menu(cb.message)
+    # ИСПРАВЛЕНО: передаём cb.from_user.id явно (см. show_songs_menu)
+    await show_songs_menu(cb.message, cb.from_user.id)
 
 async def main():
     init_db()
     bot = Bot(token=API_TOKEN, session=AiohttpSession())
-    
+
     router.message.register(cmd_start, CommandStart())
     router.message.register(next_fragment, F.text == "Next")
     router.message.register(continue_song, F.text == "Continue this song")
     router.message.register(show_songs_menu, F.text.casefold() == "play")
     router.message.register(lambda m: m.answer(f"Score: {get_user_score(m.from_user.id)} ⭐"), F.text == "My score")
-    
-    # САМЫЙ ПОСЛЕДНИЙ ХЕНДЛЕР ДЛЯ ТЕКСТА
+
+    # УДАЛЕНО: здесь раньше стоял рекурсивный вызов asyncio.run(main()),
+    # который падал с RuntimeError ("cannot be called from a running event loop")
+    # и обрывал регистрацию всех хендлеров ниже (check_answer, cb_word_click,
+    # cb_word_reset никогда не регистрировались).
+
+    # ПОСЛЕДНИЙ ХЕНДЛЕР ДЛЯ ТЕКСТА
     router.message.register(check_answer, F.text)
-    
+
     router.callback_query.register(cb_word_click, F.data.startswith("word:"))
     router.callback_query.register(cb_word_reset, F.data == "word_reset")
-    
+
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
