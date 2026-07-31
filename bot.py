@@ -125,7 +125,7 @@ SONGS = [
     },
     {
         "id": "imagine_dragons_bones",
-        "title": "Bones - Imagine Dragons",
+        "title": "Exercises to Bones",
         "external_url": "https://learningapps.org/watch?v=pr9a3hqoc26",
     },
 ]
