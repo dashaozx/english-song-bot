@@ -122,7 +122,12 @@ SONGS = [
             {"file": "sh_17.mp4", "text": "Come on now, follow my lead\nI may be crazy, don't mind me\nSay, boy, let's not talk too ___\nGrab on my waist and put that body on me", "answer": "much", "translation_ru": "Парень, давай не будем много болтать."},
             {"file": "sh_18.mp4", "text": "Come on now, follow my lead\nCome, come on now, follow my ___", "answer": "lead", "translation_ru": "Давай же, следуй за мной."}
         ]
-    }
+    },
+    {
+        "id": "imagine_dragons_bones",
+        "title": "Bones - Imagine Dragons",
+        "external_url": "https://learningapps.org/watch?v=pr9a3hqoc26",
+    },
 ]
 
 main_kb = ReplyKeyboardMarkup(
@@ -409,10 +414,14 @@ async def show_songs_menu(message: Message, user_id: int | None = None):
     # Теперь ID пользователя можно передать явно.
     uid = user_id if user_id is not None else message.from_user.id
     score = get_user_score(uid)
+    song_rows = []
+    for s in SONGS:
+        if "external_url" in s:
+            song_rows.append([InlineKeyboardButton(text=s["title"], url=s["external_url"])])
+        else:
+            song_rows.append([InlineKeyboardButton(text=s["title"], callback_data=f"song:{s['id']}")])
     kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text=s["title"], callback_data=f"song:{s['id']}")] for s in SONGS
-        ] + [[InlineKeyboardButton(text="Reset Score 🔄", callback_data="reset")]]
+        inline_keyboard=song_rows + [[InlineKeyboardButton(text="Reset Score 🔄", callback_data="reset")]]
     )
     await message.answer(f"Your Total Score: {score} ⭐\nChoose a song:", reply_markup=kb)
 
