@@ -229,12 +229,10 @@ async def send_fragment(message: Message, user_id: int):
         
         # Защита от повторного перемешивания при Reset: берем уже сохраненную строку или выбираем новую
         if "target_line" not in data:
-            line_idx = random.randrange(len(lines))
-            target_line = lines[line_idx]
-            data["target_line"] = target_line
+            line_idx = random.randint(0, len(lines) - 1)
             data["target_line_idx"] = line_idx
-        else:
-            target_line = data["target_line"]
+            data["target_line"] = lines[line_idx]
+        target_line = data["target_line"]
 
         clean_text = target_line.replace(",", "").replace(".", "").replace("(", "").replace(")", "")
         words = clean_text.split()
@@ -311,7 +309,11 @@ async def cb_word_click(cb: CallbackQuery):
 
         score = add_score(user_id, 10)
         trans_raw = fragment.get("translation_ru", "")
-        trans = trans_raw[data.get("target_line_idx", 0)] if isinstance(trans_raw, list) else trans_raw
+        if isinstance(trans_raw, list):
+            line_idx = data.get("target_line_idx", 0)
+            trans = trans_raw[line_idx] if line_idx < len(trans_raw) else " ".join(trans_raw)
+        else:
+            trans = trans_raw
 
         await cb.message.edit_text(
             f"✅ **Отлично сработано!**\n\n📝 Строчка: *{data['target_line']}*\n\n"
