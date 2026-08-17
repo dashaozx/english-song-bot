@@ -47,19 +47,102 @@ SONGS = [
         "id": "dragons_bones",
         "title": "Imagine Dragons - Bones 🦴",
         "fragments": [
-            {"file": "dragons_bones.mp4", "start": 4, "end": 8, "type": "word_order", "text": "Gimme gimme gimme some time to think\nI'm in the bathroom looking at me", "translation_ru": ["Дай мне немного времени подумать", "Я в ванной смотрю на себя"]},
-            {"file": "dragons_bones.mp4", "start": 8, "end": 12, "type": "word_order", "text": "Face in the mirror is all I need", "translation_ru": ["Лицо в зеркале — это всё, что мне нужно."]},
-            {"file": "dragons_bones.mp4", "start": 13, "end": 19, "type": "word_order", "text": "Wait until the reaper takes my life\nNever gonna get me out alive\nI will live a thousand million lives", "translation_ru": ["Жду, пока жнец заберет мою жизнь", "Меня никогда не взять живым", "Я проживу тысячу миллионов жизней"]},
-            {"file": "dragons_bones.mp4", "start": 20, "end": 29, "type": "word_order", "text": "My patience is waning\nIs this entertaining\nOur patience is waning\nIs this entertaining", "translation_ru": ["Мое терпение на исходе", "Разве это забавно?", "Наше терпение на исходе", "Разве это развлекает?"]},
-            {"file": "dragons_bones.mp4", "start": 30, "end": 46, "type": "word_order", "text": "Cause there's magic in my bones\nI got this feeling in my soul\nGo ahead and throw your stones", "translation_ru": ["Ведь в моих костях магия", "Это чувство в моей душе", "Давайте, бросайте свои камни"]},
-            {"file": "dragons_bones.mp4", "start": 46, "end": 53, "type": "word_order", "text": "Playing with a stick of dynamite\nThere was never gray in black and white\nThere was never wrong til there was right", "translation_ru": ["Играю с динамитной шашкой", "В черно-белом никогда не было серого", "Не было неправильного, пока не появилось правильное"]},
-            {"file": "dragons_bones.mp4", "start": 53, "end": 63, "type": "word_order", "text": "Feeling like a boulder hurtling\nSeeing all the vultures circling\nBurning in the flames I'm working in\nTurning in a bed that's darkening", "translation_ru": ["Чувствую себя несущимся валуном", "Вижу, как кружат стервятники", "Сгорая в пламени, в котором работаю", "Ворочаясь в темнеющей постели"]},
-            {"file": "dragons_bones.mp4", "start": 63, "end": 71, "type": "word_order", "text": "My patience is waning\nIs this entertaining\nOur patience is waning\nIs this entertaining", "translation_ru": ["Мое терпение на исходе", "Разве это забавно?", "Наше терпение на исходе", "Разве это развлекает?"]},
-            {"file": "dragons_bones.mp4", "start": 71, "end": 79, "type": "word_order", "text": "I got this feeling yeah you know\nWhere I'm losing all control\nCause there's magic in my bones", "translation_ru": ["У меня это чувство, да, ты знаешь", "Я теряю контроль", "Ведь в моих костях магия"]},
-            {"file": "dragons_bones.mp4", "start": 79, "end": 88, "type": "word_order", "text": "I got this feeling in my soul\nGo ahead and throw your stones\nCause there's magic in my bones", "translation_ru": ["Это чувство в моей душе", "Давайте, бросайте свои камни", "Ведь в моих костях магия"]},
-            {"file": "dragons_bones.mp4", "start": 96, "end": 104, "type": "word_order", "text": "Look in the mirror of my mind\nTurning the pages of my life\nWalking the path so many paced a million times", "translation_ru": ["Посмотри в зеркало моего разума", "Переворачивая страницы моей жизни", "Шагая по тропе, по которой многие ходили миллионы раз"]},
-            {"file": "dragons_bones.mp4", "start": 105, "end": 112, "type": "word_order", "text": "Drown out the voices in the air\nLeaving the ones that never cared\nPicking the pieces up and building to the sky", "translation_ru": ["Заглуши голоса в воздухе", "Оставив тех, кому было плевать", "Собирая осколки и строя до небес"]},
-            {"file": "dragons_bones.mp4", "start": 113, "end": 122, "type": "word_order", "text": "My patience is waning\nIs this entertaining\nMy patience is waning\nIs this entertaining", "translation_ru": ["Мое терпение на исходе", "Разве это интересно?", "Мое терпение угасает", "Разве это развлекает?"]}
+            {
+                "file": "dragons_bones.mp4",
+                "start": 4,
+                "end": 8,
+                "type": "word_order",
+                "text": "Gimme gimme gimme some time to think",
+                "translation_ru": ["Дай мне немного времени подумать"]
+            },
+            {
+                "file": "dragons_bones.mp4",
+                "start": 8,
+                "end": 12,
+                "type": "word_order",
+                "text": "Face in the mirror is all I need",
+                "translation_ru": ["Лицо в зеркале — это всё, что мне нужно"]
+            },
+            {
+                "file": "dragons_bones.mp4",
+                "start": 13,
+                "end": 19,
+                "type": "word_order",
+                "text": "Wait until the reaper takes my life\nNever gonna get me out alive\nI will live a thousand million lives",
+                "translation_ru": ["Жду, пока жнец заберет мою жизнь", "Меня никогда не взять живым", "Я проживу тысячу миллионов жизней"]
+            },
+            {
+                "file": "dragons_bones.mp4",
+                "start": 20,
+                "end": 29,
+                "type": "word_order",
+                "text": "My patience is waning\nIs this entertaining\nOur patience is waning\nIs this entertaining",
+                "translation_ru": ["Мое терпение на исходе", "Разве это забавно?", "Наше терпение на исходе", "Разве это развлекает?"]
+            },
+            {
+                "file": "dragons_bones.mp4",
+                "start": 30,
+                "end": 46,
+                "type": "word_order",
+                "text": "Cause there's magic in my bones\nI got this feeling in my soul\nGo ahead and throw your stones",
+                "translation_ru": ["Ведь в моих костях магия", "Это чувство в моей душе", "Давайте, бросайте свои камни"]
+            },
+            {
+                "file": "dragons_bones.mp4",
+                "start": 46,
+                "end": 53,
+                "type": "word_order",
+                "text": "Playing with a stick of dynamite\nThere was never gray in black and white\nThere was never wrong til there was right",
+                "translation_ru": ["Играю с динамитной шашкой", "В черно-белом никогда не было серого", "Не было неправильного, пока не появилось правильное"]
+            },
+            {
+                "file": "dragons_bones.mp4",
+                "start": 53,
+                "end": 63,
+                "type": "word_order",
+                "text": "Feeling like a boulder hurtling\nSeeing all the vultures circling\nBurning in the flames I'm working in\nTurning in a bed that's darkening",
+                "translation_ru": ["Чувствую себя несущимся валуном", "Вижу, как кружат стервятники", "Сгорая в пламени, в котором работаю", "Ворочаясь в темнеющей постели"]
+            },
+            {
+                "file": "dragons_bones.mp4",
+                "start": 63,
+                "end": 71,
+                "type": "word_order",
+                "text": "My patience is waning\nIs this entertaining\nOur patience is waning\nIs this entertaining",
+                "translation_ru": ["Мое терпение на исходе", "Разве это забавно?", "Наше терпение на исходе", "Разве это развлекает?"]
+            },
+            {
+                "file": "dragons_bones.mp4",
+                "start": 71,
+                "end": 79,
+                "type": "word_order",
+                "text": "I got this feeling yeah you know\nWhere I'm losing all control\nCause there's magic in my bones",
+                "translation_ru": ["У меня это чувство, да, ты знаешь", "Я теряю контроль", "Ведь в моих костях магия"]
+            },
+            {
+                "file": "dragons_bones.mp4",
+                "start": 79,
+                "end": 88,
+                "type": "word_order",
+                "text": "I got this feeling in my soul\nGo ahead and throw your stones\nCause there's magic in my bones",
+                "translation_ru": ["Это чувство в моей душе", "Давайте, бросайте свои камни", "Ведь в моих костях магия"]
+            },
+            {
+                "file": "dragons_bones.mp4",
+                "start": 96,
+                "end": 104,
+                "type": "word_order",
+                "text": "Look in the mirror of my mind\nTurning the pages of my life\nWalking the path so many paced a million times",
+                "translation_ru": ["Посмотри в зеркало моего разума", "Переворачивая страницы моей жизни", "Шагая по тропе, по которой многие ходили миллионы раз"]
+            },
+            {
+                "file": "dragons_bones.mp4",
+                "start": 105,
+                "end": 112,
+                "type": "word_order",
+                "text": "Drown out the voices in the air\nLeaving the ones that never cared\nPicking the pieces up and building to the sky",
+                "translation_ru": ["Заглуши голоса в воздухе", "Оставив тех, кому было плевать", "Собирая осколки и строя до небес"]
+            }
         ]
     },
     {
