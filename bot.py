@@ -28,7 +28,6 @@ dp = Dispatcher()
 router = Router()
 dp.include_router(router)
 
-# Функция для автоматической нарезки круглого видео "на лету" через FFmpeg
 def cut_video_note(input_file: str, output_file: str, start_sec: int, end_sec: int):
     duration = end_sec - start_sec
     cmd = [
@@ -227,21 +226,21 @@ async def send_fragment(message: Message, user_id: int):
         full_text = fragment["text"]
         lines = [line.strip() for line in full_text.split("\n") if line.strip()]
         
-        # Защита от повторного перемешивания при Reset: берем уже сохраненную строку или выбираем новую
-        if "target_line" not in data:
+        # Зафиксируем индекс конкретной случайной строчки
+        if "target_line" not in data or "target_line_idx" not in data:
             line_idx = random.randint(0, len(lines) - 1)
             data["target_line_idx"] = line_idx
             data["target_line"] = lines[line_idx]
+
         target_line = data["target_line"]
 
         clean_text = target_line.replace(",", "").replace(".", "").replace("(", "").replace(")", "")
         words = clean_text.split()
 
         indices = list(range(len(words)))
-        random.seed(user_id + idx)
+        random.seed(user_id + idx + data["target_line_idx"])
         random.shuffle(indices)
 
-        data["target_line"] = target_line
         data["words_list"] = words
         data["shuffled_indices"] = indices
         data["selected_indices"] = []
@@ -308,12 +307,20 @@ async def cb_word_click(cb: CallbackQuery):
             return
 
         score = add_score(user_id, 10)
+        
+        # ЖЕСТКАЯ ЛОГИКА ИЗВЛЕЧЕНИЯ ПЕРЕВОДА СТРОГО ДЛЯ ОДНОЙ СТРОКИ
         trans_raw = fragment.get("translation_ru", "")
+        line_idx = data.get("target_line_idx", 0)
+
         if isinstance(trans_raw, list):
-            line_idx = data.get("target_line_idx", 0)
-            trans = trans_raw[line_idx] if line_idx < len(trans_raw) else " ".join(trans_raw)
+            trans = trans_raw[line_idx] if line_idx < len(trans_raw) else trans_raw[0]
         else:
-            trans = trans_raw
+            # Если передана строка с переводами через \n или запятую
+            lines_trans = [t.strip() for t in trans_raw.split("\n") if t.strip()]
+            if len(lines_trans) > line_idx:
+                trans = lines_trans[line_idx]
+            else:
+                trans = trans_raw
 
         await cb.message.edit_text(
             f"✅ **Отлично сработано!**\n\n📝 Строчка: *{data['target_line']}*\n\n"
@@ -321,17 +328,13 @@ async def cb_word_click(cb: CallbackQuery):
             parse_mode="Markdown",
         )
 
-        # Очищаем сохраненную строку для следующего раунда
-        if "target_line" in data:
-            del data["target_line"]
-        if "target_line_idx" in data:
-            del data["target_line_idx"]
+        # Очищаем сохраненные ключи
+        data.pop("target_line", None)
+        data.pop("target_line_idx", None)
 
         if data["fragment_index"] >= len(song["fragments"]) - 1:
             del current_question[user_id]
             await cb.message.answer("🔥 **Песня полностью разобрана! Превосходный результат!**", reply_markup=main_kb)
-            # ИСПРАВЛЕНО: раньше сюда передавался cb.message, из-за чего
-            # get_user_score() считал очки бота, а не игрока, и счёт показывался как 0.
             await show_songs_menu(cb.message, user_id)
         else:
             data["awaiting_next"] = True
@@ -376,7 +379,6 @@ async def check_answer(message: Message):
     song = get_song_by_id(data["song_id"])
     fragment = song["fragments"][data["fragment_index"]]
 
-    # ЗАЩИТА: Если это режим сборки слов, текстовые сообщения тут обрабатывать не нужно!
     if fragment.get("type") == "word_order":
         return
 
@@ -415,11 +417,7 @@ async def cmd_start(message: Message):
     await show_songs_menu(message, message.from_user.id)
 
 async def show_songs_menu(message: Message, user_id: int | None = None):
-    # ИСПРАВЛЕНО: раньше здесь всегда бралось message.from_user.id,
-    # а если message приходил из callback-контекста бота (cb.message),
-    # это был ID бота, а не игрока — из-за чего счёт всегда показывался как 0.
-    # Теперь ID пользователя можно передать явно.
-    uid = user_id if user_id is not None else message.from_user.idhttps://tokokino.com/
+    uid = user_id if user_id is not None else message.from_user.id
     score = get_user_score(uid)
     song_rows = []
     for s in SONGS:
@@ -458,7 +456,6 @@ async def cb_frag(cb: CallbackQuery):
 async def cb_reset(cb: CallbackQuery):
     add_score(cb.from_user.id, -get_user_score(cb.from_user.id))
     await cb.answer("Reset!", show_alert=True)
-    # ИСПРАВЛЕНО: передаём cb.from_user.id явно (см. show_songs_menu)
     await show_songs_menu(cb.message, cb.from_user.id)
 
 async def main():
@@ -471,12 +468,6 @@ async def main():
     router.message.register(show_songs_menu, F.text.casefold() == "play")
     router.message.register(lambda m: m.answer(f"Score: {get_user_score(m.from_user.id)} ⭐"), F.text == "My score")
 
-    # УДАЛЕНО: здесь раньше стоял рекурсивный вызов asyncio.run(main()),
-    # который падал с RuntimeError ("cannot be called from a running event loop")
-    # и обрывал регистрацию всех хендлеров ниже (check_answer, cb_word_click,
-    # cb_word_reset никогда не регистрировались).
-
-    # ПОСЛЕДНИЙ ХЕНДЛЕР ДЛЯ ТЕКСТА
     router.message.register(check_answer, F.text)
 
     router.callback_query.register(cb_word_click, F.data.startswith("word:"))
