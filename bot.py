@@ -261,13 +261,16 @@ def get_song_by_id(song_id: str) -> dict | None:
     return next((s for s in SONGS if s["id"] == song_id), None)
 
 def get_words_keyboard(words: list, selected_indices: list) -> InlineKeyboardMarkup:
+    """Fixed-slot grid: selected words stay in place as placeholders so the layout does not shift."""
+    selected_set = set(selected_indices)
     buttons = []
     row = []
     for idx, word in enumerate(words):
-        if idx in selected_indices:
-            continue  
-        row.append(InlineKeyboardButton(text=word, callback_data=f"word:{idx}"))
-        if len(row) == 2:  
+        if idx in selected_set:
+            row.append(InlineKeyboardButton(text="·", callback_data=f"word_used:{idx}"))
+        else:
+            row.append(InlineKeyboardButton(text=word, callback_data=f"word:{idx}"))
+        if len(row) == 2:
             buttons.append(row)
             row = []
     if row:
@@ -349,6 +352,7 @@ async def send_fragment(message: Message, user_id: int):
         random.seed(user_id + idx + data["target_line_idx"])
         random.shuffle(indices)
 
+        data["original_words"] = words
         data["words_list"] = words
         data["shuffled_indices"] = indices
         data["selected_indices"] = []
@@ -394,15 +398,12 @@ async def cb_word_click(cb: CallbackQuery):
         correct = " ".join(clean_target.split())
 
         if assembled.lower().strip() != correct.lower().strip():
-            data["selected_indices"] = []
-            data["current_assembled"] = ""
-
             kb = get_words_keyboard(
                 [data["words_list"][i] for i in data["shuffled_indices"]],
                 data["selected_indices"],
             )
             display_text = (
-                f"❌ Неверный порядок, попробуй ещё раз\n\n"
+                f"❌ Неверный порядок — нажми ⌫, чтобы убрать последнее слово\n\n"
                 f"{_word_order_display_text(data)}"
             )
             await _safe_edit_word_order(cb.message, display_text, kb)
@@ -449,6 +450,11 @@ async def cb_word_click(cb: CallbackQuery):
     kb = get_words_keyboard([data["words_list"][i] for i in data["shuffled_indices"]], data["selected_indices"])
     await _safe_edit_word_order(cb.message, display_text, kb)
     await cb.answer()
+
+@router.callback_query(F.data.startswith("word_used:"))
+async def cb_word_used(cb: CallbackQuery):
+    await cb.answer()
+
 
 @router.callback_query(F.data == "word_backspace")
 async def cb_word_backspace(cb: CallbackQuery):
@@ -587,6 +593,7 @@ async def main():
     router.message.register(check_answer, F.text)
 
     router.callback_query.register(cb_word_click, F.data.startswith("word:"))
+    router.callback_query.register(cb_word_used, F.data.startswith("word_used:"))
     router.callback_query.register(cb_word_backspace, F.data == "word_backspace")
     router.callback_query.register(cb_word_reset, F.data == "word_reset")
 
