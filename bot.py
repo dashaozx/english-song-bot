@@ -7,6 +7,7 @@ import subprocess
 from typing import Dict
 
 from aiogram import Bot, Dispatcher, F, Router
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import CommandStart
 from aiogram.types import (
     CallbackQuery,
@@ -271,8 +272,32 @@ def get_words_keyboard(words: list, selected_indices: list) -> InlineKeyboardMar
             row = []
     if row:
         buttons.append(row)
-    buttons.append([InlineKeyboardButton(text="Reset Selection 🔄", callback_data="word_reset")])
+    buttons.append(
+        [
+            InlineKeyboardButton(text="⌫", callback_data="word_backspace"),
+            InlineKeyboardButton(text="Reset Selection 🔄", callback_data="word_reset"),
+        ]
+    )
     return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def _assembled_from_selection(data: dict) -> str:
+    current_words = [data["words_list"][data["shuffled_indices"][i]] for i in data["selected_indices"]]
+    return " ".join(current_words)
+
+
+def _word_order_display_text(data: dict) -> str:
+    assembled = data.get("current_assembled") or ""
+    phrase = assembled if assembled else "(пока пусто)"
+    return f"{data['word_order_header']}\n\n**Твоя фраза:** {phrase}"
+
+
+async def _safe_edit_word_order(message: Message, display_text: str, kb: InlineKeyboardMarkup) -> None:
+    try:
+        await message.edit_text(display_text, reply_markup=kb, parse_mode="Markdown")
+    except TelegramBadRequest as e:
+        if "message is not modified" not in str(e).lower():
+            raise
 
 async def send_fragment(message: Message, user_id: int):
     data = current_question.get(user_id)
@@ -352,8 +377,7 @@ async def cb_word_click(cb: CallbackQuery):
         return await cb.answer()
 
     data["selected_indices"].append(clicked_idx)
-    current_words = [data["words_list"][data["shuffled_indices"][i]] for i in data["selected_indices"]]
-    data["current_assembled"] = " ".join(current_words)
+    data["current_assembled"] = _assembled_from_selection(data)
     
     song = get_song_by_id(data["song_id"])
     fragment = song["fragments"][data["fragment_index"]]
@@ -379,13 +403,9 @@ async def cb_word_click(cb: CallbackQuery):
             )
             display_text = (
                 f"❌ Неверный порядок, попробуй ещё раз\n\n"
-                f"{data['word_order_header']}\n\n"
-                f"**Твоя фраза:** (пока пусто)"
+                f"{_word_order_display_text(data)}"
             )
-            try:
-                await cb.message.edit_text(display_text, reply_markup=kb, parse_mode="Markdown")
-            except Exception:
-                pass
+            await _safe_edit_word_order(cb.message, display_text, kb)
             await cb.answer()
             return
 
@@ -425,13 +445,31 @@ async def cb_word_click(cb: CallbackQuery):
         await cb.answer()
         return
 
-    display_text = f"{data['word_order_header']}\n\n**Твоя фраза:** {data['current_assembled']}"
+    display_text = _word_order_display_text(data)
     kb = get_words_keyboard([data["words_list"][i] for i in data["shuffled_indices"]], data["selected_indices"])
-    
-    try:
-        await cb.message.edit_text(display_text, reply_markup=kb, parse_mode="Markdown")
-    except Exception:
-        pass
+    await _safe_edit_word_order(cb.message, display_text, kb)
+    await cb.answer()
+
+@router.callback_query(F.data == "word_backspace")
+async def cb_word_backspace(cb: CallbackQuery):
+    user_id = cb.from_user.id
+    if user_id not in current_question:
+        return await cb.answer()
+
+    data = current_question[user_id]
+    selected = data.get("selected_indices")
+    if not selected:
+        await cb.answer("Строка пуста", show_alert=False)
+        return
+
+    selected.pop()
+    data["current_assembled"] = _assembled_from_selection(data)
+
+    kb = get_words_keyboard(
+        [data["words_list"][i] for i in data["shuffled_indices"]],
+        data["selected_indices"],
+    )
+    await _safe_edit_word_order(cb.message, _word_order_display_text(data), kb)
     await cb.answer()
 
 @router.callback_query(F.data == "word_reset")
@@ -444,13 +482,8 @@ async def cb_word_reset(cb: CallbackQuery):
     data["selected_indices"] = []
     data["current_assembled"] = ""
     
-    display_text = f"{data['word_order_header']}\n\n**Твоя фраза:** (пока пусто)"
     kb = get_words_keyboard([data["words_list"][i] for i in data["shuffled_indices"]], data["selected_indices"])
-    
-    try:
-        await cb.message.edit_text(display_text, reply_markup=kb, parse_mode="Markdown")
-    except Exception:
-        pass
+    await _safe_edit_word_order(cb.message, _word_order_display_text(data), kb)
     await cb.answer("Выбор сброшен 🔄")
 
 async def check_answer(message: Message):
@@ -554,6 +587,7 @@ async def main():
     router.message.register(check_answer, F.text)
 
     router.callback_query.register(cb_word_click, F.data.startswith("word:"))
+    router.callback_query.register(cb_word_backspace, F.data == "word_backspace")
     router.callback_query.register(cb_word_reset, F.data == "word_reset")
 
     await bot.delete_webhook(drop_pending_updates=True)
