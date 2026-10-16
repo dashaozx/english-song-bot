@@ -22,6 +22,8 @@ from aiogram.client.session.aiohttp import AiohttpSession
 # --- CONFIG ---
 API_TOKEN = os.getenv("BOT_TOKEN")
 DB_PATH = "scores.db"
+# Кружочек «Шаг 1»: только прослушивание, без задания.
+LISTEN_VIDEO_NOTE_ID = "AAMCAgADGQEAAS-_EWrQd2Asy2KEUGive-IvnF-RjbZCAAJWqwACeguBSu9JqQzgY-tuAQAHbQADPQQ"
 logging.basicConfig(level=logging.INFO)
 
 dp = Dispatcher()
@@ -182,15 +184,29 @@ def get_words_keyboard(words: list, selected_indices: list) -> InlineKeyboardMar
     row = []
     for idx, word in enumerate(words):
         if idx in selected_indices:
-            continue  
-        row.append(InlineKeyboardButton(text=word, callback_data=f"word:{idx}"))
-        if len(row) == 2:  
+            order = selected_indices.index(idx) + 1
+            label = f"✅{order}"
+        else:
+            label = word
+        row.append(InlineKeyboardButton(text=label, callback_data=f"word:{idx}"))
+        if len(row) == 2:
             buttons.append(row)
             row = []
     if row:
         buttons.append(row)
-    buttons.append([InlineKeyboardButton(text="Reset Selection 🔄", callback_data="word_reset")])
+    buttons.append([
+        InlineKeyboardButton(text="⬅️ Убрать последнее слово", callback_data="word_undo"),
+        InlineKeyboardButton(text="Сбросить всё 🔄", callback_data="word_reset"),
+    ])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+async def send_listen_video_note(message: Message):
+    """Шаг 1: кружочек только для прослушивания, без заданий."""
+    await message.answer("🎧 Шаг 1: просто послушай кружочек — без заданий.")
+    await message.bot.send_video_note(
+        chat_id=message.chat.id,
+        video_note=LISTEN_VIDEO_NOTE_ID,
+    )
 
 async def send_fragment(message: Message, user_id: int):
     data = current_question.get(user_id)
@@ -360,6 +376,30 @@ async def cb_word_reset(cb: CallbackQuery):
         pass
     await cb.answer("Выбор сброшен 🔄")
 
+@router.callback_query(F.data == "word_undo")
+async def cb_word_undo(cb: CallbackQuery):
+    user_id = cb.from_user.id
+    if user_id not in current_question:
+        return await cb.answer()
+
+    data = current_question[user_id]
+    if not data.get("selected_indices"):
+        return await cb.answer("Пока нечего убирать")
+
+    data["selected_indices"].pop()
+    current_words = [data["words_list"][data["shuffled_indices"][i]] for i in data["selected_indices"]]
+    data["current_assembled"] = " ".join(current_words)
+
+    phrase = data["current_assembled"] if data["current_assembled"] else "(пока пусто)"
+    display_text = f"{data['word_order_header']}\n\n**Твоя фраза:** {phrase}"
+    kb = get_words_keyboard([data["words_list"][i] for i in data["shuffled_indices"]], data["selected_indices"])
+
+    try:
+        await cb.message.edit_text(display_text, reply_markup=kb, parse_mode="Markdown")
+    except Exception:
+        pass
+    await cb.answer("Убрано последнее слово")
+
 async def check_answer(message: Message):
     user_id = message.from_user.id
     if user_id not in current_question or any(current_question[user_id].get(k) for k in ["awaiting_next", "awaiting_continue"]):
@@ -405,6 +445,7 @@ async def continue_song(message: Message):
 
 async def cmd_start(message: Message):
     await message.answer("Welcome!", reply_markup=main_kb)
+    await send_listen_video_note(message)
     await show_songs_menu(message, message.from_user.id)
 
 async def show_songs_menu(message: Message, user_id: int | None = None):
@@ -437,8 +478,9 @@ async def show_fragments_menu(message: Message, song_id: str):
 
 @router.callback_query(F.data.startswith("song:"))
 async def cb_song(cb: CallbackQuery):
-    await show_fragments_menu(cb.message, cb.data.split(":")[1])
     await cb.answer()
+    await send_listen_video_note(cb.message)
+    await show_fragments_menu(cb.message, cb.data.split(":")[1])
 
 @router.callback_query(F.data.startswith("sel_f:"))
 async def cb_frag(cb: CallbackQuery):
@@ -474,6 +516,7 @@ async def main():
 
     router.callback_query.register(cb_word_click, F.data.startswith("word:"))
     router.callback_query.register(cb_word_reset, F.data == "word_reset")
+    router.callback_query.register(cb_word_undo, F.data == "word_undo")
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
