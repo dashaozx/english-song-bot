@@ -23,7 +23,7 @@ from aiogram.client.session.aiohttp import AiohttpSession
 API_TOKEN = os.getenv("BOT_TOKEN")
 DB_PATH = "scores.db"
 # Кружочек «Шаг 1»: только прослушивание, без задания.
-LISTEN_VIDEO_NOTE_ID = "AAMCAgADGQEAAS-_EWrQd2Asy2KEUGive-IvnF-RjbZCAAJWqwACeguBSu9JqQzgY-tuAQAHbQADPQQ"
+LISTEN_VIDEO_NOTE_ID = "BAACAgIAAxkBAAIRaWrTa5ZyOTWSGRXMty_0YAWeXHlkAAKgqAACbIyZSvAG_hSgFmKrPQQ"
 logging.basicConfig(level=logging.INFO)
 
 dp = Dispatcher()
