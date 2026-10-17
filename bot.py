@@ -402,7 +402,7 @@ async def cb_word_undo(cb: CallbackQuery):
 
 async def check_answer(message: Message):
     user_id = message.from_user.id
-    if user_id not in current_question or any(current_question[user_id].get(k) for k in ["awaiting_next", "awaiting_continue", "awaiting_listen_next"]):
+    if user_id not in current_question or any(current_question[user_id].get(k) for k in ["awaiting_next", "awaiting_continue"]):
         return
     
     data = current_question[user_id]
@@ -433,15 +433,8 @@ async def check_answer(message: Message):
 
 async def next_fragment(message: Message):
     uid = message.from_user.id
-    data = current_question.get(uid)
-    if not data:
-        return
-    if data.get("awaiting_listen_next"):
-        data["awaiting_listen_next"] = False
-        await show_fragments_menu(message, data["song_id"])
-        return
-    if data.get("awaiting_next"):
-        data.update({"fragment_index": data["fragment_index"] + 1, "awaiting_next": False})
+    if uid in current_question and current_question[uid].get("awaiting_next"):
+        current_question[uid].update({"fragment_index": current_question[uid]["fragment_index"] + 1, "awaiting_next": False})
         await send_fragment(message, uid)
 
 async def continue_song(message: Message):
@@ -452,7 +445,6 @@ async def continue_song(message: Message):
 
 async def cmd_start(message: Message):
     await message.answer("Welcome!", reply_markup=main_kb)
-    await send_listen_video_note(message)
     await show_songs_menu(message, message.from_user.id)
 
 async def show_songs_menu(message: Message, user_id: int | None = None):
@@ -487,16 +479,12 @@ async def show_fragments_menu(message: Message, song_id: str):
 async def cb_song(cb: CallbackQuery):
     await cb.answer()
     song_id = cb.data.split(":")[1]
-    current_question[cb.from_user.id] = {
-        "song_id": song_id,
-        "awaiting_listen_next": True,
-    }
     await cb.message.answer("🎧 Шаг 1: просто послушай кружочек — без заданий.")
     try:
         await cb.message.answer_video_note(video_note=LISTEN_VIDEO_NOTE_ID)
     except Exception as e:
         await cb.message.answer(f"⚠️ Ошибка отправки кружочка:\n{e}")
-    await cb.message.answer("Когда дослушаешь — нажми Next.", reply_markup=next_fragment_kb)
+    await show_fragments_menu(cb.message, song_id)
 
 @router.message(F.video | F.video_note | F.document)
 async def on_video_file_id(message: Message):
