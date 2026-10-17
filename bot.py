@@ -479,10 +479,15 @@ async def show_fragments_menu(message: Message, song_id: str):
 @router.callback_query(F.data.startswith("song:"))
 async def cb_song(cb: CallbackQuery):
     await cb.answer()
-await cb.message.answer_video_note(
-    video_note="AAMCAgADGQEAAS-_EWrQd2Asy2KEUGive-IvnF-RjbZCAAJWqwACeguBSu9JqQzgY-tuAQAHbQADPQQ"
-)
+    try:
+        await cb.message.answer_video_note(video_note=LISTEN_VIDEO_NOTE_ID)
+    except Exception as e:
+        await cb.message.answer(f"⚠️ Ошибка отправки кружочка:\n{e}")
     await show_fragments_menu(cb.message, cb.data.split(":")[1])
+
+@router.message(F.video_note)
+async def on_video_note(message: Message):
+    await message.answer(message.video_note.file_id)
 
 @router.callback_query(F.data.startswith("sel_f:"))
 async def cb_frag(cb: CallbackQuery):
@@ -503,6 +508,7 @@ async def main():
     bot = Bot(token=API_TOKEN, session=AiohttpSession())
 
     router.message.register(cmd_start, CommandStart())
+    router.message.register(on_video_note, F.video_note)
     router.message.register(next_fragment, F.text == "Next")
     router.message.register(continue_song, F.text == "Continue this song")
     router.message.register(show_songs_menu, F.text.casefold() == "play")
