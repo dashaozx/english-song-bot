@@ -479,7 +479,9 @@ async def show_fragments_menu(message: Message, song_id: str):
 @router.callback_query(F.data.startswith("song:"))
 async def cb_song(cb: CallbackQuery):
     await cb.answer()
-    await send_listen_video_note(cb.message)
+await cb.message.answer_video_note(
+    video_note="AAMCAgADGQEAAS-_EWrQd2Asy2KEUGive-IvnF-RjbZCAAJWqwACeguBSu9JqQzgY-tuAQAHbQADPQQ"
+)
     await show_fragments_menu(cb.message, cb.data.split(":")[1])
 
 @router.callback_query(F.data.startswith("sel_f:"))
