@@ -200,14 +200,6 @@ def get_words_keyboard(words: list, selected_indices: list) -> InlineKeyboardMar
     ])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
-async def send_listen_video_note(message: Message):
-    """Шаг 1: кружочек только для прослушивания, без заданий."""
-    await message.answer("🎧 Шаг 1: просто послушай кружочек — без заданий.")
-    await message.bot.send_video_note(
-        chat_id=message.chat.id,
-        video_note=LISTEN_VIDEO_NOTE_ID,
-    )
-
 async def send_fragment(message: Message, user_id: int):
     data = current_question.get(user_id)
     if not data:
@@ -479,11 +471,12 @@ async def show_fragments_menu(message: Message, song_id: str):
 async def cb_song(cb: CallbackQuery):
     await cb.answer()
     song_id = cb.data.split(":")[1]
-    await cb.message.answer("🎧 Шаг 1: просто послушай кружочек — без заданий.")
-    try:
-        await cb.message.answer_video_note(video_note=LISTEN_VIDEO_NOTE_ID)
-    except Exception as e:
-        await cb.message.answer(f"⚠️ Ошибка отправки кружочка:\n{e}")
+    if song_id == "ed_sheeran_shape":
+        await cb.message.answer("🎧 Шаг 1: просто послушай кружочек — без заданий.")
+        try:
+            await cb.message.answer_video_note(video_note=LISTEN_VIDEO_NOTE_ID)
+        except Exception as e:
+            await cb.message.answer(f"⚠️ Ошибка отправки кружочка:\n{e}")
     await show_fragments_menu(cb.message, song_id)
 
 @router.message(F.video | F.video_note | F.document)
