@@ -22,8 +22,6 @@ from aiogram.client.session.aiohttp import AiohttpSession
 # --- CONFIG ---
 API_TOKEN = os.getenv("BOT_TOKEN")
 DB_PATH = "scores.db"
-# Кружочек «Шаг 1»: только прослушивание, без задания.
-LISTEN_VIDEO_NOTE_ID = "BAACAgIAAxkBAAIRaWrTa5ZyOTWSGRXMty_0YAWeXHlkAAKgqAACbIyZSvAG_hSgFmKrPQQ"
 logging.basicConfig(level=logging.INFO)
 
 dp = Dispatcher()
@@ -49,6 +47,7 @@ SONGS = [
     {
         "id": "dragons_bones",
         "title": "Imagine Dragons - Bones 🦴",
+        "intro_video_note": "BAACAgIAAxkBAAIRqGrfiJR_Wd2BET5wv5JtAiDVjBCCAALfqQAC6AX5ShCigjb7qGiCPQQ",
         "fragments": [
             {"file": "dragons_bones.mp4", "start": 4, "end": 8, "type": "word_order", "text": "Gimme gimme gimme some time to think\nI'm in the bathroom looking at me", "translation_ru": "Дай мне немного времени подумать, я в ванной смотрю на себя."},
             {"file": "dragons_bones.mp4", "start": 8, "end": 12, "type": "word_order", "text": "Face in the mirror is all I need", "translation_ru": "Лицо в зеркале — это всё, что мне нужно."},
@@ -68,6 +67,7 @@ SONGS = [
     {
         "id": "the_beatles_yesterday",
         "title": "Yesterday - The Beatles",
+        "intro_video_note": "BAACAgIAAxkBAAIRrGrfiKJkxrMVlVPUTaSiMS8zPhA7AALjqQAC6AX5ShPt-5i8xZOMPQQ",
         "fragments": [
             {"file": "y_0.mp4", "text": "Yesterday, all my troubles seemed so far ___", "answer": "away", "translation_ru": "Вчера все мои беды казались такими далекими."},
             {"file": "y_1.mp4", "text": "Now it looks as though they're here to ___", "answer": "stay", "translation_ru": "Теперь кажется, что они здесь надолго."},
@@ -84,6 +84,7 @@ SONGS = [
     {
         "id": "miley_flowers",
         "title": "Flowers - Miley Cyrus",
+        "intro_video_note": "BAACAgIAAxkBAAIRqmrfiJu31mdf2KXf3yGkLtsr9uqOAALhqQAC6AX5SvTBlBRjhnzPPQQ",
         "fragments": [
             {"file": "fl_0.mp4", "text": "We were good, we were gold\nKind of dream that can't be ___", "answer": "sold", "translation_ru": "Мечта, которую не продать."},
             {"file": "fl_1.mp4", "text": "We were right 'til we weren't\nBuilt a ___ and watched it burn", "answer": "home", "translation_ru": "Построили дом и смотрели, как он горит."},
@@ -103,6 +104,7 @@ SONGS = [
     {
         "id": "ed_sheeran_shape",
         "title": "Shape of You - Ed Sheeran",
+        "intro_video_note": "BAACAgIAAxkBAAIRaWrTa5ZyOTWSGRXMty_0YAWeXHlkAAKgqAACbIyZSvAG_hSgFmKrPQQ",
         "fragments": [
             {"file": "sh_0.mp4", "text": "The club isn't the best place to find a ___\nSo the bar is where I go", "answer": "lover", "translation_ru": "Клуб — не лучшее место для поиска любви."},
             {"file": "sh_1.mp4", "text": "Me and my friends at the table doing ___\nDrinking fast and then we talk slow", "answer": "shots", "translation_ru": "Мы с друзьями пьем шоты."},
@@ -128,6 +130,7 @@ SONGS = [
     {
         "id": "imagine_dragons_bones",
         "title": "Exercises to Bones",
+        "intro_video_note": "BAACAgIAAxkBAAIRqGrfiJR_Wd2BET5wv5JtAiDVjBCCAALfqQAC6AX5ShCigjb7qGiCPQQ",
         "external_url": "https://learningapps.org/watch?v=pr9a3hqoc26",
     },
 ]
@@ -471,10 +474,12 @@ async def show_fragments_menu(message: Message, song_id: str):
 async def cb_song(cb: CallbackQuery):
     await cb.answer()
     song_id = cb.data.split(":")[1]
-    if song_id == "ed_sheeran_shape":
+    song = get_song_by_id(song_id)
+    intro_id = song.get("intro_video_note") if song else None
+    if intro_id:
         await cb.message.answer("🎧 Шаг 1: просто послушай кружочек — без заданий.")
         try:
-            await cb.message.answer_video_note(video_note=LISTEN_VIDEO_NOTE_ID)
+            await cb.message.answer_video_note(video_note=intro_id)
         except Exception as e:
             await cb.message.answer(f"⚠️ Ошибка отправки кружочка:\n{e}")
     await show_fragments_menu(cb.message, song_id)
