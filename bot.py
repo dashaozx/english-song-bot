@@ -387,13 +387,30 @@ async def cb_song(cb: CallbackQuery):
     await cb.answer()
     song_id = cb.data.split(":")[1]
     song = get_song_by_id(song_id)
-    intro_id = song.get("intro_video_note") if song else None
-    if intro_id:
+    intro = song.get("intro_video_note") if song else None
+    if isinstance(intro, str) and intro:
         await cb.message.answer("🎧 Шаг 1: просто послушай кружочек — без заданий.")
         try:
-            await cb.message.answer_video_note(video_note=intro_id)
+            await cb.message.answer_video_note(video_note=intro)
         except Exception as e:
             await cb.message.answer(f"⚠️ Ошибка отправки кружочка:\n{e}")
+    elif isinstance(intro, dict) and "start" in intro and "end" in intro:
+        await cb.message.answer("🎧 Шаг 1: просто послушай кружочек — без заданий.")
+        input_path = os.path.join("audio", intro["file"])
+        output_path = os.path.join("audio", f"cut_{song_id}_intro.mp4")
+        if not os.path.exists(input_path):
+            await cb.message.answer(f"⚠️ Базовый файл {intro['file']} не найден в папке audio")
+        else:
+            if not os.path.exists(output_path):
+                await cb.message.answer("🔄 Подготавливаю видео-кружочек...")
+                cut_video_note(input_path, output_path, intro["start"], intro["end"])
+            if os.path.exists(output_path):
+                await cb.message.bot.send_video_note(
+                    chat_id=cb.message.chat.id,
+                    video_note=FSInputFile(output_path),
+                )
+            else:
+                await cb.message.answer("⚠️ Ошибка обработки видео.")
     await show_fragments_menu(cb.message, song_id)
 
 @router.message(F.video | F.video_note | F.document)
