@@ -384,6 +384,81 @@
     ]
   },
   {
+    "id": "new_rules",
+    "title": "Dua Lipa - New Rules",
+    "intro_video_note": {
+      "file": "new_rules.mp4",
+      "start": 8,
+      "end": 68
+    },
+    "fragments": [
+      {
+        "file": "new_rules.mp4",
+        "start": 8,
+        "end": 22,
+        "type": "word_order",
+        "text": "talkin' in my sleep at night,\nMakin' myself crazy.",
+        "translation_ru": "Разговаривая во сне,\nПотихоньку схожу с ума."
+      },
+      {
+        "file": "new_rules.mp4",
+        "start": 26,
+        "end": 31,
+        "type": "word_order",
+        "text": "Wrote it down and read it out\nHopin' it would save me.",
+        "translation_ru": "Написала и прочитала,\nНадеясь, что это спасет меня."
+      },
+      {
+        "file": "new_rules.mp4",
+        "start": 32,
+        "end": 50,
+        "type": "word_order",
+        "text": "My love, he makes me feel like nobody else,\nNobody else.\nBut my love, he doesn't love me, so I tell myself\nI tell myself",
+        "translation_ru": "Моя любовь, он заставляет меня чувствовать себя, как никто другой,\nНикто другой.\nНо, моя любовь, он не любит меня, поэтому я говорю себе,\nГоворю себе."
+      },
+      {
+        "file": "new_rules.mp4",
+        "start": 50,
+        "end": 68,
+        "type": "word_order",
+        "text": "One, don't pick up the phone.\nYou know he's only calling 'cause he's drunk and alone.\nTwo, don't let him in.\nYou'll have to kick him out again.\nThree, don't be his friend\nYou know you're gonna wake up in his bed in the morning\nAnd if you're under him, you ain't getting over him",
+        "translation_ru": "Один: не бери телефон.\nТы знаешь, он звонит лишь потому, что пьян и одинок.\nДва: не впускай его.\nВедь тебе придется выгнать его снова.\nТри: не будь ему другом.\nТы знаешь, это приведет к тому, что ты проснешься утром в его кровати.\nНаходясь под его чарами, тебе его не забыть."
+      },
+      {
+        "file": "new_rules.mp4",
+        "start": 68,
+        "end": 85,
+        "type": "word_order",
+        "text": "I got new rules, I count 'em.\nI got new rules, I count 'em.\nI gotta tell them to myself.\nI got new rules, I count 'em.\nI gotta tell them to myself.",
+        "translation_ru": "У меня теперь новые правила и я считаюсь с ними,\nУ меня теперь новые правила и я считаюсь с ними.\nЯ должна напоминать себе про них.\nУ меня теперь новые правила и я считаюсь с ними.\nЯ просто должна напоминать себе про них."
+      },
+      {
+        "file": "new_rules.mp4",
+        "start": 85,
+        "end": 94,
+        "type": "word_order",
+        "text": "I keep pushin' forwards, but he keeps pullin' me backwards\nno way.\nno.",
+        "translation_ru": "Я продолжаю двигаться вперед, но он тянет меня назад.\nни за что.\nнет."
+      },
+      {
+        "file": "new_rules.mp4",
+        "start": 94,
+        "end": 111,
+        "type": "word_order",
+        "text": "no.\nNow I'm standing back from it, I finally see the pattern\nBut my love, he doesn't love me, so I tell myself,\nI tell myself.\nI do, I do, I do.",
+        "translation_ru": "нет.\nТеперь, когда я далеко от всего этого, я вижу шаблон.\nНо, моя любовь, он не любит меня, поэтому я говорю себе,\nГоворю себе."
+      },
+      {
+        "file": "new_rules.mp4",
+        "start": 145,
+        "end": 163,
+        "type": "word_order",
+        "text": "Practice makes perfect\nI'm still tryna' learn it by heart\nEat, sleep, and breathe it\nRehearse and repeat it, 'cause I",
+        "translation_ru": "Практикуясь, мы совершенствуемся.\nЯ все еще пытаюсь \"вызубрить\" это.\nЕшьте, спите и дышите.\nРепетируйте и повторяйте это, потому что у меня"
+      }
+    ]
+  },
+  {
     "id": "imagine_dragons_bones",
     "title": "Exercises to Bones",
     "intro_video_note": "BAACAgIAAxkBAAIRqGrfiJR_Wd2BET5wv5JtAiDVjBCCAALfqQAC6AX5ShCigjb7qGiCPQQ",
