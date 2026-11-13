@@ -152,8 +152,10 @@ async def send_fragment(message: Message, user_id: int):
         
         # Защита от повторного перемешивания при Reset: берем уже сохраненную строку или выбираем новую
         if "target_line" not in data:
-            target_line = random.choice(lines)
+            target_index = random.randrange(len(lines))
+            target_line = lines[target_index]
             data["target_line"] = target_line
+            data["target_index"] = target_index
         else:
             target_line = data["target_line"]
 
@@ -232,6 +234,13 @@ async def cb_word_click(cb: CallbackQuery):
 
         score = add_score(user_id, 10)
         trans = fragment.get("translation_ru", "")
+        # Если перевод построчный (строк столько же, сколько в тексте),
+        # показываем перевод именно той строчки, которую собирал игрок.
+        text_lines = [l.strip() for l in fragment.get("text", "").split("\n") if l.strip()]
+        trans_lines = [l.strip() for l in trans.split("\n") if l.strip()]
+        t_idx = data.get("target_index")
+        if t_idx is not None and len(trans_lines) == len(text_lines):
+            trans = trans_lines[t_idx]
 
         await cb.message.edit_text(
             f"✅ **Отлично сработано!**\n\n📝 Строчка: *{data['target_line']}*\n\n"
@@ -242,6 +251,7 @@ async def cb_word_click(cb: CallbackQuery):
         # Очищаем сохраненную строку для следующего раунда
         if "target_line" in data:
             del data["target_line"]
+        data.pop("target_index", None)
 
         if data["fragment_index"] >= len(song["fragments"]) - 1:
             del current_question[user_id]
