@@ -23,6 +23,11 @@ from aiogram.client.session.aiohttp import AiohttpSession
 # --- CONFIG ---
 API_TOKEN = os.getenv("BOT_TOKEN")
 DB_PATH = "scores.db"
+# Необязательные настройки (задаются в Railway -> Variables):
+# TEACHER_CHAT_ID - числовой Telegram ID преподавателя, куда приходят ответы "Теперь ты"
+# TEACHER_CONTACT_URL - ссылка для кнопки "Написать преподавателю", например https://t.me/username
+TEACHER_CHAT_ID = os.getenv("TEACHER_CHAT_ID")
+TEACHER_CONTACT_URL = os.getenv("TEACHER_CONTACT_URL")
 logging.basicConfig(level=logging.INFO)
 
 dp = Dispatcher()
@@ -115,6 +120,94 @@ def get_words_keyboard(words: list, selected_indices: list) -> InlineKeyboardMar
     ])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
+async def finish_step(message: Message, user_id: int):
+    """Общий переход после шага без видео: к следующему шагу или конец песни."""
+    data = current_question.get(user_id)
+    if not data:
+        return
+    song = get_song_by_id(data["song_id"])
+    if data["fragment_index"] >= len(song["fragments"]) - 1:
+        del current_question[user_id]
+        await message.answer("🔥 Песня полностью разобрана! Превосходный результат!", reply_markup=main_kb)
+        if TEACHER_CONTACT_URL:
+            kb = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="💬 Написать преподавателю", url=TEACHER_CONTACT_URL)]
+            ])
+            await message.answer("Хочешь разобрать эту песню и грамматику с преподавателем? Напиши мне 👇", reply_markup=kb)
+        await show_songs_menu(message, user_id)
+    else:
+        data["awaiting_next"] = True
+        await message.answer("Переходим к следующему шагу?", reply_markup=next_fragment_kb)
+
+async def send_activity(message: Message, user_id: int, fragment: dict):
+    """Шаги без видео: выбор варианта (choose) и задание 'Теперь ты' (practice)."""
+    kind = fragment.get("type")
+    if kind == "choose":
+        title = fragment.get("title", "🧠 Выбери правильный вариант")
+        buttons = [
+            [InlineKeyboardButton(text=opt, callback_data=f"opt:{i}")]
+            for i, opt in enumerate(fragment["options"])
+        ]
+        await message.answer(
+            f"{title}\n\n{fragment['question']}",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons),
+        )
+    elif kind == "practice":
+        text = "✍️ Теперь ты!\n\n" + fragment["prompt_ru"]
+        if fragment.get("hint"):
+            text += "\n\n💡 " + fragment["hint"]
+        await message.answer(text)
+
+async def handle_practice(message: Message, user_id: int, data: dict, song: dict, fragment: dict):
+    if data.get("done_idx") == data["fragment_index"]:
+        return
+    answer = (message.text or "").strip()
+    if len(answer.split()) < 3:
+        return await message.answer("Напиши, пожалуйста, хотя бы пару слов или предложений на английском 🙂")
+    data["done_idx"] = data["fragment_index"]
+    score = add_score(user_id, fragment.get("points", 15))
+    sent = False
+    if TEACHER_CHAT_ID:
+        u = message.from_user
+        who = f"{u.full_name} (@{u.username})" if u.username else f"{u.full_name} (id {u.id})"
+        try:
+            await message.bot.send_message(
+                int(TEACHER_CHAT_ID),
+                f"📝 Practice — {song['title']}\nОт: {who}\n\n{answer}",
+            )
+            sent = True
+        except Exception as e:
+            logging.warning("Could not send practice answer to teacher: %s", e)
+    note = "Ответ отправлен преподавателю на проверку 📨" if sent else "Спасибо за ответ!"
+    await message.answer(f"✅ {note}\nТвой счет: {score} ⭐")
+    await finish_step(message, user_id)
+
+@router.callback_query(F.data.startswith("opt:"))
+async def cb_option(cb: CallbackQuery):
+    user_id = cb.from_user.id
+    data = current_question.get(user_id)
+    if not data:
+        return await cb.answer()
+    song = get_song_by_id(data["song_id"])
+    fragment = song["fragments"][data["fragment_index"]]
+    if fragment.get("type") != "choose" or data.get("done_idx") == data["fragment_index"]:
+        return await cb.answer()
+    chosen = int(cb.data.split(":")[1])
+    if chosen != fragment["answer"]:
+        return await cb.answer("Не совсем 🙂 Попробуй ещё раз")
+    data["done_idx"] = data["fragment_index"]
+    score = add_score(user_id, 10)
+    explanation = fragment.get("explanation_ru", "")
+    try:
+        await cb.message.edit_text(
+            f"✅ Отлично!\n\n{fragment['question']}\n\nОтвет: {fragment['options'][chosen]}\n"
+            f"{explanation}\n\nТвой счет: {score} ⭐"
+        )
+    except Exception:
+        pass
+    await cb.answer()
+    await finish_step(cb.message, user_id)
+
 async def send_fragment(message: Message, user_id: int):
     data = current_question.get(user_id)
     if not data:
@@ -123,6 +216,9 @@ async def send_fragment(message: Message, user_id: int):
     song = get_song_by_id(data["song_id"])
     idx = data["fragment_index"]
     fragment = song["fragments"][idx]
+
+    if fragment.get("type") in ("choose", "practice"):
+        return await send_activity(message, user_id, fragment)
 
     input_path = os.path.join("audio", fragment["file"])
     if not os.path.exists(input_path):
@@ -152,7 +248,8 @@ async def send_fragment(message: Message, user_id: int):
         
         # Защита от повторного перемешивания при Reset: берем уже сохраненную строку или выбираем новую
         if "target_line" not in data:
-            target_index = random.randrange(len(lines))
+            candidates = [i for i, l in enumerate(lines) if len(l.split()) >= 3] or list(range(len(lines)))
+            target_index = random.choice(candidates)
             target_line = lines[target_index]
             data["target_line"] = target_line
             data["target_index"] = target_index
@@ -325,6 +422,12 @@ async def check_answer(message: Message):
     data = current_question[user_id]
     song = get_song_by_id(data["song_id"])
     fragment = song["fragments"][data["fragment_index"]]
+
+    ftype = fragment.get("type")
+    if ftype == "choose":
+        return
+    if ftype == "practice":
+        return await handle_practice(message, user_id, data, song, fragment)
 
     # ЗАЩИТА: Если это режим сборки слов, текстовые сообщения тут обрабатывать не нужно!
     if fragment.get("type") == "word_order":

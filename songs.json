@@ -455,6 +455,60 @@
         "type": "word_order",
         "text": "Practice makes perfect\nI'm still tryna' learn it by heart\nEat, sleep, and breathe it\nRehearse and repeat it, 'cause I",
         "translation_ru": "Практикуясь, мы совершенствуемся.\nЯ все еще пытаюсь \"вызубрить\" это.\nЕшьте, спите и дышите.\nРепетируйте и повторяйте это, потому что у меня"
+      },
+      {
+        "type": "choose",
+        "title": "🧠 Выбери правильное предложение",
+        "question": "Как правильно дать совет-запрет?",
+        "options": [
+          "Don't to pick up the phone.",
+          "Don't pick up the phone.",
+          "Not pick up the phone."
+        ],
+        "answer": 1,
+        "explanation_ru": "После don't глагол идёт без to: Don't pick up the phone."
+      },
+      {
+        "type": "choose",
+        "title": "🧩 Закончи выражение",
+        "question": "It took me a year to ___ him.",
+        "options": [
+          "get over",
+          "get on",
+          "get off"
+        ],
+        "answer": 0,
+        "explanation_ru": "get over someone — пережить расставание, забыть человека."
+      },
+      {
+        "type": "choose",
+        "title": "🧩 Закончи выражение",
+        "question": "I'm trying to learn the rules ___ heart.",
+        "options": [
+          "by",
+          "with",
+          "in"
+        ],
+        "answer": 0,
+        "explanation_ru": "learn something by heart — выучить наизусть."
+      },
+      {
+        "type": "choose",
+        "title": "🧩 Закончи выражение",
+        "question": "I ___ myself the same rules every morning.",
+        "options": [
+          "say",
+          "tell",
+          "speak"
+        ],
+        "answer": 1,
+        "explanation_ru": "tell yourself — говорить себе, убеждать себя."
+      },
+      {
+        "type": "practice",
+        "prompt_ru": "Твоя подруга хочет снова написать бывшему. Дай ей три совета на английском, как в песне: Don't… / Don't let… / Remember to… Напиши все три в одном сообщении.",
+        "hint": "После don't глагол идёт без to. Например: Don't text him at night.",
+        "points": 15
       }
     ]
   },
