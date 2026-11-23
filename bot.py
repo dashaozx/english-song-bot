@@ -99,7 +99,7 @@ def add_score(user_id: int, points: int) -> int:
 def get_song_by_id(song_id: str) -> dict | None:
     return next((s for s in SONGS if s["id"] == song_id), None)
 
-def get_words_keyboard(words: list, selected_indices: list) -> InlineKeyboardMarkup:
+def get_words_keyboard(words: list, selected_indices: list, hint_pos=None, practice_url: str = "") -> InlineKeyboardMarkup:
     buttons = []
     row = []
     for idx, word in enumerate(words):
@@ -107,7 +107,7 @@ def get_words_keyboard(words: list, selected_indices: list) -> InlineKeyboardMar
             order = selected_indices.index(idx) + 1
             label = f"✅{order}"
         else:
-            label = word
+            label = f"👉 {word}" if idx == hint_pos else word
         row.append(InlineKeyboardButton(text=label, callback_data=f"word:{idx}"))
         if len(row) == 2:
             buttons.append(row)
@@ -118,7 +118,37 @@ def get_words_keyboard(words: list, selected_indices: list) -> InlineKeyboardMar
         InlineKeyboardButton(text="⬅️ Убрать последнее слово", callback_data="word_undo"),
         InlineKeyboardButton(text="Сбросить всё 🔄", callback_data="word_reset"),
     ])
+    buttons.append([InlineKeyboardButton(text="💡 Подсказка", callback_data="hint_word")])
+    buttons += practice_rows(practice_url)
     return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+PRACTICE_LABEL = "🎯 Потренируйся: дай отпор бывшему по-английски"
+
+def practice_rows(url: str) -> list:
+    """Строка с кнопкой-ссылкой на упражнение (LearningApps). Если url пустой, кнопки нет."""
+    if not url:
+        return []
+    return [[InlineKeyboardButton(text=PRACTICE_LABEL, url=url)]]
+
+def practice_markup(url: str):
+    return InlineKeyboardMarkup(inline_keyboard=practice_rows(url)) if url else None
+
+def words_kb(data: dict) -> InlineKeyboardMarkup:
+    return get_words_keyboard(
+        [data["words_list"][i] for i in data["shuffled_indices"]],
+        data["selected_indices"],
+        hint_pos=data.get("hint_pos"),
+        practice_url=data.get("practice_url", ""),
+    )
+
+def gap_kb(practice_url: str = "") -> InlineKeyboardMarkup:
+    rows = [[InlineKeyboardButton(text="💡 Подсказка", callback_data="hint_gap")]]
+    rows += practice_rows(practice_url)
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+def points_for(data: dict, base: int = 10) -> int:
+    """Баллы за задание: каждая подсказка снижает награду на 2, минимум 2."""
+    return max(2, base - 2 * data.get("hints_used", 0))
 
 async def finish_step(message: Message, user_id: int):
     """Общий переход после шага без видео: к следующему шагу или конец песни."""
@@ -148,6 +178,7 @@ async def send_activity(message: Message, user_id: int, fragment: dict):
             [InlineKeyboardButton(text=opt, callback_data=f"opt:{i}")]
             for i, opt in enumerate(fragment["options"])
         ]
+        buttons += practice_rows(fragment.get("practice_url", ""))
         await message.answer(
             f"{title}\n\n{fragment['question']}",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons),
@@ -156,7 +187,7 @@ async def send_activity(message: Message, user_id: int, fragment: dict):
         text = "✍️ Теперь ты!\n\n" + fragment["prompt_ru"]
         if fragment.get("hint"):
             text += "\n\n💡 " + fragment["hint"]
-        await message.answer(text)
+        await message.answer(text, reply_markup=practice_markup(fragment.get("practice_url", "")))
 
 async def handle_practice(message: Message, user_id: int, data: dict, song: dict, fragment: dict):
     if data.get("done_idx") == data["fragment_index"]:
@@ -201,7 +232,8 @@ async def cb_option(cb: CallbackQuery):
     try:
         await cb.message.edit_text(
             f"✅ Отлично!\n\n{fragment['question']}\n\nОтвет: {fragment['options'][chosen]}\n"
-            f"{explanation}\n\nТвой счет: {score} ⭐"
+            f"{explanation}\n\nТвой счет: {score} ⭐",
+            reply_markup=practice_markup(fragment.get("practice_url", "")),
         )
     except Exception:
         pass
@@ -217,7 +249,26 @@ async def send_fragment(message: Message, user_id: int):
     idx = data["fragment_index"]
     fragment = song["fragments"][idx]
 
+    # Сброс подсказок для нового фрагмента
+    data["hints_used"] = 0
+    data["hint_level"] = 0
+    data["hint_pos"] = None
+    data["practice_url"] = fragment.get("practice_url", "")
+
     if fragment.get("type") in ("choose", "practice"):
+        if fragment.get("file") and "start" in fragment and "end" in fragment:
+            in_path = os.path.join("audio", fragment["file"])
+            out_path = os.path.join("audio", f"cut_{data['song_id']}_{idx}.mp4")
+            if not os.path.exists(in_path):
+                await message.answer(f"⚠️ Базовый файл {fragment['file']} не найден в папке audio")
+            else:
+                if not os.path.exists(out_path):
+                    await message.answer("🔄 Подготавливаю видео-кружочек...")
+                    cut_video_note(in_path, out_path, fragment["start"], fragment["end"])
+                if os.path.exists(out_path):
+                    await message.bot.send_video_note(chat_id=message.chat.id, video_note=FSInputFile(out_path))
+                else:
+                    await message.answer("⚠️ Ошибка обработки видео.")
         return await send_activity(message, user_id, fragment)
 
     input_path = os.path.join("audio", fragment["file"])
@@ -270,14 +321,15 @@ async def send_fragment(message: Message, user_id: int):
         data["current_assembled"] = ""
         data["word_order_header"] = "🧩 **Послушай кружочек и собери строчку!** Нажимай на слова по порядку:"
 
-        kb = get_words_keyboard([words[i] for i in indices], data["selected_indices"])
+        kb = words_kb(data)
         await message.answer(
             f"{data['word_order_header']}\n\n**Твоя фраза:** (пока пусто)",
             reply_markup=kb,
             parse_mode="Markdown",
         )
     else:
-        await message.answer(fragment["text"])
+        sent = await message.answer(fragment["text"], reply_markup=gap_kb(data["practice_url"]))
+        data["gap_msg_id"] = sent.message_id
 
 @router.callback_query(F.data.startswith("word:"))
 async def cb_word_click(cb: CallbackQuery):
@@ -292,6 +344,7 @@ async def cb_word_click(cb: CallbackQuery):
         return await cb.answer()
 
     data["selected_indices"].append(clicked_idx)
+    data["hint_pos"] = None
     current_words = [data["words_list"][data["shuffled_indices"][i]] for i in data["selected_indices"]]
     data["current_assembled"] = " ".join(current_words)
     
@@ -313,10 +366,7 @@ async def cb_word_click(cb: CallbackQuery):
             data["selected_indices"] = []
             data["current_assembled"] = ""
 
-            kb = get_words_keyboard(
-                [data["words_list"][i] for i in data["shuffled_indices"]],
-                data["selected_indices"],
-            )
+            kb = words_kb(data)
             display_text = (
                 f"❌ Неверный порядок, попробуй ещё раз\n\n"
                 f"{data['word_order_header']}\n\n"
@@ -329,7 +379,7 @@ async def cb_word_click(cb: CallbackQuery):
             await cb.answer()
             return
 
-        score = add_score(user_id, 10)
+        score = add_score(user_id, points_for(data))
         trans = fragment.get("translation_ru", "")
         # Если перевод построчный (строк столько же, сколько в тексте),
         # показываем перевод именно той строчки, которую собирал игрок.
@@ -343,6 +393,7 @@ async def cb_word_click(cb: CallbackQuery):
             f"✅ **Отлично сработано!**\n\n📝 Строчка: *{data['target_line']}*\n\n"
             f"Твой счет: {score} ⭐\nПеревод: {trans}",
             parse_mode="Markdown",
+            reply_markup=practice_markup(fragment.get("practice_url", "")),
         )
 
         # Очищаем сохраненную строку для следующего раунда
@@ -363,7 +414,7 @@ async def cb_word_click(cb: CallbackQuery):
         return
 
     display_text = f"{data['word_order_header']}\n\n**Твоя фраза:** {data['current_assembled']}"
-    kb = get_words_keyboard([data["words_list"][i] for i in data["shuffled_indices"]], data["selected_indices"])
+    kb = words_kb(data)
     
     try:
         await cb.message.edit_text(display_text, reply_markup=kb, parse_mode="Markdown")
@@ -379,10 +430,11 @@ async def cb_word_reset(cb: CallbackQuery):
     
     data = current_question[user_id]
     data["selected_indices"] = []
+    data["hint_pos"] = None
     data["current_assembled"] = ""
     
     display_text = f"{data['word_order_header']}\n\n**Твоя фраза:** (пока пусто)"
-    kb = get_words_keyboard([data["words_list"][i] for i in data["shuffled_indices"]], data["selected_indices"])
+    kb = words_kb(data)
     
     try:
         await cb.message.edit_text(display_text, reply_markup=kb, parse_mode="Markdown")
@@ -401,18 +453,84 @@ async def cb_word_undo(cb: CallbackQuery):
         return await cb.answer("Пока нечего убирать")
 
     data["selected_indices"].pop()
+    data["hint_pos"] = None
     current_words = [data["words_list"][data["shuffled_indices"][i]] for i in data["selected_indices"]]
     data["current_assembled"] = " ".join(current_words)
 
     phrase = data["current_assembled"] if data["current_assembled"] else "(пока пусто)"
     display_text = f"{data['word_order_header']}\n\n**Твоя фраза:** {phrase}"
-    kb = get_words_keyboard([data["words_list"][i] for i in data["shuffled_indices"]], data["selected_indices"])
+    kb = words_kb(data)
 
     try:
         await cb.message.edit_text(display_text, reply_markup=kb, parse_mode="Markdown")
     except Exception:
         pass
     await cb.answer("Убрано последнее слово")
+
+@router.callback_query(F.data == "hint_word")
+async def cb_hint_word(cb: CallbackQuery):
+    """Подсказка в сборке строчки: подсвечивает кнопку со следующим правильным словом."""
+    data = current_question.get(cb.from_user.id)
+    if not data or data.get("awaiting_next") or not data.get("words_list"):
+        return await cb.answer()
+    words = data["words_list"]
+    selected = data["selected_indices"]
+    n = len(selected)
+    if n >= len(words):
+        return await cb.answer()
+    chosen = [words[data["shuffled_indices"][i]].lower() for i in selected]
+    if chosen != [w.lower() for w in words[:n]]:
+        return await cb.answer(
+            "В выбранных словах есть ошибка. Нажми «⬅️ Убрать последнее слово» или «Сбросить всё».",
+            show_alert=True,
+        )
+    target = words[n].lower()
+    pos = next(
+        (p for p, wi in enumerate(data["shuffled_indices"]) if p not in selected and words[wi].lower() == target),
+        None,
+    )
+    if pos is None:
+        return await cb.answer()
+    if data.get("hint_pos") == pos:
+        return await cb.answer("Подсказка уже на экране 👉")
+    data["hint_pos"] = pos
+    data["hints_used"] = data.get("hints_used", 0) + 1
+    try:
+        await cb.message.edit_reply_markup(reply_markup=words_kb(data))
+    except Exception:
+        pass
+    await cb.answer("Подсвечено следующее слово 👉")
+
+@router.callback_query(F.data == "hint_gap")
+async def cb_hint_gap(cb: CallbackQuery):
+    """Подсказка в задании с пропуском: каждое нажатие открывает ещё одну букву ответа."""
+    data = current_question.get(cb.from_user.id)
+    if not data or data.get("awaiting_next") or data.get("awaiting_continue"):
+        return await cb.answer()
+    if data.get("gap_msg_id") != cb.message.message_id:
+        return await cb.answer()
+    song = get_song_by_id(data["song_id"])
+    fragment = song["fragments"][data["fragment_index"]]
+    answer = fragment.get("answer")
+    if not answer:
+        return await cb.answer()
+    max_level = len(answer) - 1  # последнюю букву не открываем
+    level = data.get("hint_level", 0)
+    if max_level < 1:
+        return await cb.answer("Слово слишком короткое для подсказки")
+    if level >= max_level:
+        return await cb.answer("Больше подсказок нет 🙂")
+    level += 1
+    data["hint_level"] = level
+    data["hints_used"] = data.get("hints_used", 0) + 1
+    mask = " ".join(list(answer[:level]) + ["_"] * (len(answer) - level))
+    text = fragment["text"]
+    text = text.replace("___", mask, 1) if "___" in text else f"{text}\n{mask}"
+    try:
+        await cb.message.edit_text(text, reply_markup=gap_kb(data.get("practice_url", "")))
+    except Exception:
+        pass
+    await cb.answer()
 
 async def check_answer(message: Message):
     user_id = message.from_user.id
@@ -434,7 +552,7 @@ async def check_answer(message: Message):
         return
 
     if message.text.lower().strip() == fragment["answer"].lower().strip():
-        score = add_score(user_id, 10)
+        score = add_score(user_id, points_for(data))
         trans = fragment.get("translation_ru", "")
 
         if data["fragment_index"] >= len(song["fragments"]) - 1:
