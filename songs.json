@@ -2,7 +2,11 @@
   {
     "id": "dragons_bones",
     "title": "Imagine Dragons - Bones 🦴",
-    "intro_video_note": "BAACAgIAAxkBAAIRqGrfiJR_Wd2BET5wv5JtAiDVjBCCAALfqQAC6AX5ShCigjb7qGiCPQQ",
+    "intro_video_note": {
+    "file": "dragons_bones.mp4",
+    "start": 0,
+    "end": 60
+},
     "fragments": [
       {
         "file": "dragons_bones.mp4",
@@ -113,7 +117,11 @@
   {
     "id": "the_beatles_yesterday",
     "title": "Yesterday - The Beatles",
-    "intro_video_note": "BAACAgIAAxkBAAIRrGrfiKJkxrMVlVPUTaSiMS8zPhA7AALjqQAC6AX5ShPt-5i8xZOMPQQ",
+    "intro_video_note": {
+    "file": "yesterday.mp4",
+    "start": 0,
+    "end": 60
+},
     "fragments": [
       {
         "file": "y_0.mp4",
@@ -180,7 +188,11 @@
   {
     "id": "miley_flowers",
     "title": "Flowers - Miley Cyrus",
-    "intro_video_note": "BAACAgIAAxkBAAIRqmrfiJu31mdf2KXf3yGkLtsr9uqOAALhqQAC6AX5SvTBlBRjhnzPPQQ",
+    "intro_video_note": {
+    "file": "flowers.mp4",
+    "start": 0,
+    "end": 60
+},
     "fragments": [
       {
         "file": "fl_0.mp4",
@@ -265,7 +277,11 @@
   {
     "id": "ed_sheeran_shape",
     "title": "Shape of You - Ed Sheeran",
-    "intro_video_note": "BAACAgIAAxkBAAIRaWrTa5ZyOTWSGRXMty_0YAWeXHlkAAKgqAACbIyZSvAG_hSgFmKrPQQ",
+    "intro_video_note": {
+    "file": "shape_of_you.mp4",
+    "start": 0,
+    "end": 60
+},
     "fragments": [
       {
         "file": "sh_0.mp4",
