@@ -665,23 +665,59 @@ async def cb_learning_mode(cb: CallbackQuery):
     if mode == "direct":
         await show_fragments_menu(cb.message, song_id)
     elif mode == "prep":
-        presentation = (
-            "📚 <b>With preparation — знакомимся с выражениями</b>\n\n"
-            "Прочитай диалог. Обрати внимание на выделенные выражения.\n\n"
-            "<b>Anna:</b> I can't stop thinking about him. I <b>make myself crazy</b> "
-            "every time he doesn't reply to my messages.\n\n"
-            "<b>Lisa:</b> You need to stop letting him <b>pull you backwards</b>. "
-            "You've been trying to <b>keep pushing forward</b>.\n\n"
-            "<b>Anna:</b> But what if he calls me tonight? Should I <b>pick up the phone</b>?\n\n"
-            "<b>Lisa:</b> I wouldn't. And don't <b>let him in</b> again. "
-            "Remember, you had to <b>kick him out</b> last time!\n\n"
-            "<b>Anna:</b> You're right. I think I'm finally starting to <b>see the pattern</b>. "
-            "I need to <b>get over him</b> and move on."
+        # Presentation is split into short Telegram messages for easier reading.
+        await cb.message.answer(
+            "📚 <b>WITH PREPARATION</b>\n"
+            "<i>Знакомимся с выражениями в контексте</i>\n\n"
+            "💬 <b>Anna & Lisa</b>\n"
+            "Прочитай разговор. Обрати внимание на выражения, выделенные жирным.",
+            parse_mode="HTML",
         )
-        next_kb = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="🎵 Перейти к заданиям песни", callback_data=f"prep_song:{song_id}")]
-        ])
-        await cb.message.answer(presentation, parse_mode="HTML", reply_markup=next_kb)
+        await cb.message.answer(
+            "👩 <b>ANNA</b>\n"
+            "I can't stop thinking about him. I <b>make myself crazy</b> "
+            "every time he doesn't reply to my messages.",
+            parse_mode="HTML",
+        )
+        await cb.message.answer(
+            "👩‍🦰 <b>LISA</b>\n"
+            "You need to stop letting him <b>pull you backwards</b>. "
+            "You've been trying to <b>keep pushing forward</b>.",
+            parse_mode="HTML",
+        )
+        await cb.message.answer(
+            "👩 <b>ANNA</b>\n"
+            "But what if he calls me tonight? Should I <b>pick up the phone</b>?",
+            parse_mode="HTML",
+        )
+        await cb.message.answer(
+            "👩‍🦰 <b>LISA</b>\n"
+            "I wouldn't. And don't <b>let him in</b> again. "
+            "Remember, you had to <b>kick him out</b> last time!",
+            parse_mode="HTML",
+        )
+        await cb.message.answer(
+            "👩 <b>ANNA</b>\n"
+            "You're right. I think I'm finally starting to <b>see the pattern</b>. "
+            "I need to <b>get over him</b> and move on.",
+            parse_mode="HTML",
+        )
+        await cb.message.answer(
+            "🎯 <b>TARGET LANGUAGE</b>\n\n"
+            "1️⃣ make myself crazy\n"
+            "2️⃣ pick up the phone\n"
+            "3️⃣ let someone in\n"
+            "4️⃣ kick someone out\n"
+            "5️⃣ get over someone\n"
+            "6️⃣ keep pushing forward\n"
+            "7️⃣ pull someone backwards\n"
+            "8️⃣ see the pattern\n\n"
+            "💡 Прочитай диалог ещё раз и обрати внимание, как эти выражения используются в речи.",
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="🎵 Перейти к заданиям песни", callback_data=f"prep_song:{song_id}")]
+            ]),
+        )
 
 @router.callback_query(F.data.startswith("prep_song:"))
 async def cb_prep_song(cb: CallbackQuery):
