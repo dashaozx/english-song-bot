@@ -665,10 +665,29 @@ async def cb_learning_mode(cb: CallbackQuery):
     if mode == "direct":
         await show_fragments_menu(cb.message, song_id)
     elif mode == "prep":
-        await cb.message.answer(
-            "📚 Подготовка к песне будет добавлена следующим шагом. "
-            "Сейчас можно выбрать режим Without preparation и пройти существующие задания."
+        presentation = (
+            "📚 <b>With preparation — знакомимся с выражениями</b>\n\n"
+            "Прочитай диалог. Обрати внимание на выделенные выражения.\n\n"
+            "<b>Anna:</b> I can't stop thinking about him. I <b>make myself crazy</b> "
+            "every time he doesn't reply to my messages.\n\n"
+            "<b>Lisa:</b> You need to stop letting him <b>pull you backwards</b>. "
+            "You've been trying to <b>keep pushing forward</b>.\n\n"
+            "<b>Anna:</b> But what if he calls me tonight? Should I <b>pick up the phone</b>?\n\n"
+            "<b>Lisa:</b> I wouldn't. And don't <b>let him in</b> again. "
+            "Remember, you had to <b>kick him out</b> last time!\n\n"
+            "<b>Anna:</b> You're right. I think I'm finally starting to <b>see the pattern</b>. "
+            "I need to <b>get over him</b> and move on."
         )
+        next_kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🎵 Перейти к заданиям песни", callback_data=f"prep_song:{song_id}")]
+        ])
+        await cb.message.answer(presentation, parse_mode="HTML", reply_markup=next_kb)
+
+@router.callback_query(F.data.startswith("prep_song:"))
+async def cb_prep_song(cb: CallbackQuery):
+    song_id = cb.data.split(":", 1)[1]
+    await cb.answer()
+    await show_fragments_menu(cb.message, song_id)
 
 @router.message(F.video | F.video_note | F.document)
 async def on_video_file_id(message: Message):
