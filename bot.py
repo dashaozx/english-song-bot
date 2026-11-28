@@ -66,6 +66,66 @@ pause_choice_kb = ReplyKeyboardMarkup(
 )
 
 current_question: Dict[int, Dict[str, object]] = {}
+prep_quiz_progress: Dict[int, int] = {}
+
+NEW_RULES_CHUNK_QUESTIONS = [
+    {
+        "chunk": "make myself crazy",
+        "example": "I make myself crazy when I worry too much.",
+        "options": ["Сильно переживать, изводить себя", "Радовать себя", "Злиться на других"],
+        "answer": 0,
+        "explanation": "make myself crazy — сильно переживать, изводить себя мыслями или тревогами.",
+    },
+    {
+        "chunk": "pick up the phone",
+        "example": "Should I pick up the phone?",
+        "options": ["Купить телефон", "Ответить на звонок", "Положить трубку"],
+        "answer": 1,
+        "explanation": "pick up the phone — взять трубку, ответить на звонок.",
+    },
+    {
+        "chunk": "let someone in",
+        "example": "Don't let him in again.",
+        "options": ["Позволить кому-то войти", "Позвонить кому-то", "Проводить кого-то"],
+        "answer": 0,
+        "explanation": "let someone in — впустить кого-то. В контексте песни также может подразумеваться эмоционально подпустить человека.",
+    },
+    {
+        "chunk": "kick someone out",
+        "example": "You had to kick him out last time.",
+        "options": ["Пригласить кого-то", "Попросить кого-то уйти / выгнать", "Помочь кому-то"],
+        "answer": 1,
+        "explanation": "kick someone out — выгнать кого-то, заставить уйти.",
+    },
+    {
+        "chunk": "get over someone",
+        "example": "I need to get over him and move on.",
+        "options": ["Познакомиться с кем-то", "Пережить расставание, эмоционально отпустить человека", "Посетить кого-то"],
+        "answer": 1,
+        "explanation": "get over someone — пережить расставание и эмоционально отпустить человека.",
+    },
+    {
+        "chunk": "keep pushing forward",
+        "example": "I'm trying to keep pushing forward.",
+        "options": ["Продолжать двигаться вперёд", "Остановиться и подождать", "Вернуться назад"],
+        "answer": 0,
+        "explanation": "keep pushing forward — продолжать двигаться вперёд, несмотря на трудности.",
+    },
+    {
+        "chunk": "pull someone backwards",
+        "example": "This relationship keeps pulling me backwards.",
+        "options": ["Помогать кому-то развиваться", "Тянуть кого-то назад", "Идти рядом с кем-то"],
+        "answer": 1,
+        "explanation": "pull someone backwards — тянуть кого-то назад, мешать двигаться дальше.",
+    },
+    {
+        "chunk": "see the pattern",
+        "example": "Now I can see the pattern.",
+        "options": ["Смотреть на картинку", "Замечать повторяющуюся ситуацию", "Искать выход из здания"],
+        "answer": 1,
+        "explanation": "see the pattern — замечать повторяющуюся ситуацию или закономерность.",
+    },
+]
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -212,6 +272,86 @@ async def handle_practice(message: Message, user_id: int, data: dict, song: dict
     note = "Ответ отправлен преподавателю на проверку 📨" if sent else "Спасибо за ответ!"
     await message.answer(f"✅ {note}\nТвой счет: {score} ⭐")
     await finish_step(message, user_id)
+
+async def send_prep_quiz_question(message: Message, user_id: int):
+    question_index = prep_quiz_progress.get(user_id, 0)
+    question = NEW_RULES_CHUNK_QUESTIONS[question_index]
+    buttons = [
+        [InlineKeyboardButton(text=f"{chr(65 + i)}. {option}", callback_data=f"prepqa:{question_index}:{i}")]
+        for i, option in enumerate(question["options"])
+    ]
+    await message.answer(
+        f"🧠 <b>CONTROLLED PRACTICE</b> · {question_index + 1}/8\n\n"
+        f"<b>{question['chunk']}</b>\n"
+        f"<i>{question['example']}</i>\n\n"
+        "Выбери правильное значение:",
+        parse_mode="HTML",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons),
+    )
+
+
+@router.callback_query(F.data.startswith("prepqa:"))
+async def cb_prep_quiz_answer(cb: CallbackQuery):
+    try:
+        _, question_index, option_index = cb.data.split(":")
+        question_index = int(question_index)
+        option_index = int(option_index)
+    except (ValueError, TypeError):
+        return await cb.answer()
+
+    user_id = cb.from_user.id
+    current_index = prep_quiz_progress.get(user_id)
+    if current_index != question_index or question_index >= len(NEW_RULES_CHUNK_QUESTIONS):
+        return await cb.answer("Это задание уже завершено или устарело.")
+
+    question = NEW_RULES_CHUNK_QUESTIONS[question_index]
+    if option_index != question["answer"]:
+        return await cb.answer("Не совсем 🙂 Попробуй ещё раз.", show_alert=True)
+
+    next_index = question_index + 1
+    prep_quiz_progress[user_id] = next_index
+    await cb.answer("Верно! ✅")
+
+    if next_index < len(NEW_RULES_CHUNK_QUESTIONS):
+        next_button = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="➡️ Следующий вопрос", callback_data=f"prepqn:{next_index}")]
+        ])
+    else:
+        next_button = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🎵 Перейти к заданиям песни", callback_data="prepquiz_done:new_rules")]
+        ])
+
+    try:
+        await cb.message.edit_text(
+            f"✅ <b>Правильно!</b>\n\n"
+            f"<b>{question['chunk']}</b> — {question['options'][question['answer']]}\n\n"
+            f"💡 {question['explanation']}",
+            parse_mode="HTML",
+            reply_markup=next_button,
+        )
+    except Exception:
+        pass
+
+
+@router.callback_query(F.data.startswith("prepqn:"))
+async def cb_prep_quiz_next(cb: CallbackQuery):
+    try:
+        question_index = int(cb.data.split(":", 1)[1])
+    except ValueError:
+        return await cb.answer()
+    user_id = cb.from_user.id
+    if prep_quiz_progress.get(user_id) != question_index:
+        return await cb.answer()
+    await cb.answer()
+    await send_prep_quiz_question(cb.message, user_id)
+
+
+@router.callback_query(F.data == "prepquiz_done:new_rules")
+async def cb_prep_quiz_done(cb: CallbackQuery):
+    await cb.answer()
+    prep_quiz_progress.pop(cb.from_user.id, None)
+    await show_fragments_menu(cb.message, "new_rules")
+
 
 @router.callback_query(F.data.startswith("opt:"))
 async def cb_option(cb: CallbackQuery):
@@ -715,9 +855,15 @@ async def cb_learning_mode(cb: CallbackQuery):
             "💡 Прочитай диалог ещё раз и обрати внимание, как эти выражения используются в речи.",
             parse_mode="HTML",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="🎵 Перейти к заданиям песни", callback_data=f"prep_song:{song_id}")]
+                [InlineKeyboardButton(text="🧠 Проверить понимание · 8 вопросов", callback_data="prepquiz_start:new_rules")]
             ]),
         )
+
+@router.callback_query(F.data == "prepquiz_start:new_rules")
+async def cb_prep_quiz_start(cb: CallbackQuery):
+    prep_quiz_progress[cb.from_user.id] = 0
+    await cb.answer()
+    await send_prep_quiz_question(cb.message, cb.from_user.id)
 
 @router.callback_query(F.data.startswith("prep_song:"))
 async def cb_prep_song(cb: CallbackQuery):
