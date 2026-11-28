@@ -642,7 +642,33 @@ async def cb_song(cb: CallbackQuery):
                 )
             else:
                 await cb.message.answer("⚠️ Ошибка обработки видео.")
-    await show_fragments_menu(cb.message, song_id)
+    # Для New Rules пользователь выбирает формат обучения после вступительного видео.
+    if song_id == "new_rules":
+        mode_kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="📚 With preparation", callback_data=f"mode:prep:{song_id}")],
+            [InlineKeyboardButton(text="🎧 Without preparation", callback_data=f"mode:direct:{song_id}")],
+        ])
+        await cb.message.answer(
+            "How would you like to practise this song?\n\n"
+            "📚 With preparation — learn the useful expressions first.\n"
+            "🎧 Without preparation — go straight to the song exercises.",
+            reply_markup=mode_kb,
+        )
+    else:
+        await show_fragments_menu(cb.message, song_id)
+
+@router.callback_query(F.data.startswith("mode:"))
+async def cb_learning_mode(cb: CallbackQuery):
+    _, mode, song_id = cb.data.split(":", 2)
+    await cb.answer()
+
+    if mode == "direct":
+        await show_fragments_menu(cb.message, song_id)
+    elif mode == "prep":
+        await cb.message.answer(
+            "📚 Подготовка к песне будет добавлена следующим шагом. "
+            "Сейчас можно выбрать режим Without preparation и пройти существующие задания."
+        )
 
 @router.message(F.video | F.video_note | F.document)
 async def on_video_file_id(message: Message):
