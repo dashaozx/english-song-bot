@@ -645,8 +645,8 @@ async def cb_song(cb: CallbackQuery):
     # Для New Rules пользователь выбирает формат обучения после вступительного видео.
     if song_id == "new_rules":
         mode_kb = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="📚 With preparation", callback_data=f"mode:prep:{song_id}")],
-            [InlineKeyboardButton(text="🎧 Without preparation", callback_data=f"mode:direct:{song_id}")],
+            [InlineKeyboardButton(text="📚 With preparation — с подготовкой", callback_data=f"mode:prep:{song_id}")],
+            [InlineKeyboardButton(text="🎧 Without preparation — без подготовки", callback_data=f"mode:direct:{song_id}")],
         ])
         await cb.message.answer(
             "How would you like to practise this song?\n\n"
